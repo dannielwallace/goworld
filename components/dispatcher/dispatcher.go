@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dannielwallace/goworld/components/dispatcher/dispatcher_impl"
 	"os"
 	"syscall"
 
@@ -12,11 +13,11 @@ import (
 
 	"runtime/debug"
 
-	"github.com/xiaonanln/goworld/engine/binutil"
-	"github.com/xiaonanln/goworld/engine/config"
-	"github.com/xiaonanln/goworld/engine/consts"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/engine/post"
+	"github.com/dannielwallace/goworld/engine/binutil"
+	"github.com/dannielwallace/goworld/engine/config"
+	"github.com/dannielwallace/goworld/engine/consts"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/post"
 )
 
 var (
@@ -26,7 +27,7 @@ var (
 	logLevel          string
 	runInDaemonMode   bool
 	sigChan           = make(chan os.Signal, 1)
-	dispatcherService *DispatcherService
+	dispatcherService *dispatcher_impl.DispatcherService
 )
 
 func parseArgs() {
@@ -68,9 +69,9 @@ func main() {
 	binutil.SetupGWLog("dispatcherService", logLevel, dispatcherConfig.LogFile, dispatcherConfig.LogStderr)
 	binutil.SetupHTTPServer(dispatcherConfig.HTTPAddr, nil)
 
-	dispatcherService = newDispatcherService(dispid)
+	dispatcherService = dispatcher_impl.NewDispatcherService(dispid)
 	setupSignals() // call setupSignals to avoid data race on `dispatcherService`
-	dispatcherService.run()
+	dispatcherService.Run()
 }
 
 func setupSignals() {
@@ -83,7 +84,7 @@ func setupSignals() {
 			if sig == syscall.SIGINT || sig == syscall.SIGTERM {
 				// interrupting, quit dispatcher
 				post.Post(func() {
-					dispatcherService.terminate()
+					dispatcherService.Terminate()
 				})
 			} else {
 				gwlog.Infof("unexcepted signal: %s", sig)

@@ -3,7 +3,7 @@ package netutil
 import (
 	"testing"
 
-	"github.com/xiaonanln/goworld/engine/uuid"
+	"github.com/dannielwallace/goworld/engine/uuid"
 )
 
 type testMsg struct {

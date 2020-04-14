@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 
 	"github.com/bmizerany/assert"
-	"github.com/xiaonanln/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 )
 
 func init() {

@@ -3,9 +3,9 @@ package entitystoragemysql
 import (
 	"database/sql"
 
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/netutil"
-	"github.com/xiaonanln/goworld/engine/storage/storage_common"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/netutil"
+	"github.com/dannielwallace/goworld/engine/storage/storage_common"
 
 	"fmt"
 

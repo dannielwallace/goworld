@@ -2,8 +2,8 @@
 _**Scalable Distributed Game Server Engine with Hot Reload in Golang**_
 
 
-[![GoDoc](https://godoc.org/github.com/xiaonanln/goworld?status.png)](https://godoc.org/github.com/xiaonanln/goworld) 
-[![Build Status](https://api.travis-ci.org/xiaonanln/goworld.svg?branch=master)](https://travis-ci.org/xiaonanln/goworld) [![Go Report Card](https://goreportcard.com/badge/github.com/xiaonanln/goworld)](https://goreportcard.com/report/github.com/xiaonanln/goworld) [![codecov](https://codecov.io/gh/xiaonanln/goworld/branch/master/graph/badge.svg)](https://codecov.io/gh/xiaonanln/goworld) 
+[![GoDoc](https://godoc.org/github.com/dannielwallace/goworld?status.png)](https://godoc.org/github.com/dannielwallace/goworld) 
+[![Build Status](https://api.travis-ci.org/xiaonanln/goworld.svg?branch=master)](https://travis-ci.org/xiaonanln/goworld) [![Go Report Card](https://goreportcard.com/badge/github.com/dannielwallace/goworld)](https://goreportcard.com/report/github.com/dannielwallace/goworld) [![codecov](https://codecov.io/gh/xiaonanln/goworld/branch/master/graph/badge.svg)](https://codecov.io/gh/xiaonanln/goworld) 
 [![ApacheLicense](https://img.shields.io/badge/license-APACHE%20License-blue.svg)](https://raw.githubusercontent.com/xiaonanln/goworld/master/LICENSE)
 
   * [Features](#features)
@@ -16,10 +16,10 @@ _**Scalable Distributed Game Server Engine with Hot Reload in Golang**_
     * [Unity Demo](#unity-demo): [GoWorldUnityDemo.zip](https://drive.google.com/file/d/1A1CJCVWFQWa-iMuAoAdHZ4JoXTtU5Q7z/view?usp=sharing) 
 ---------------------------------------
 #### 中文资料 
-> [中文文档](https://godoc.org/github.com/xiaonanln/goworld/cn)  
+> [中文文档](https://godoc.org/github.com/dannielwallace/goworld/cn)  
 > [游戏服务器介绍](http://www.cnblogs.com/isaiah/p/7259036.html)  
-> [目录结构说明](https://github.com/xiaonanln/goworld/wiki/GoWorld%E6%B8%B8%E6%88%8F%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%95%E6%93%8E%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84)   
-> [使用GoWorld轻松实现分布式聊天服务器](https://github.com/xiaonanln/goworld/wiki/%E4%BD%BF%E7%94%A8GoWorld%E6%B8%B8%E6%88%8F%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%95%E6%93%8E%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E8%81%8A%E5%A4%A9%E6%9C%8D%E5%8A%A1%E5%99%A8)  
+> [目录结构说明](https://github.com/dannielwallace/goworld/wiki/GoWorld%E6%B8%B8%E6%88%8F%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%95%E6%93%8E%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84)   
+> [使用GoWorld轻松实现分布式聊天服务器](https://github.com/dannielwallace/goworld/wiki/%E4%BD%BF%E7%94%A8GoWorld%E6%B8%B8%E6%88%8F%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%95%E6%93%8E%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E8%81%8A%E5%A4%A9%E6%9C%8D%E5%8A%A1%E5%99%A8)  
 
 
 #### 游戏服务端开源引擎GoWorld教程  
@@ -66,7 +66,7 @@ back to work but with the latest executable image. This feature enables updating
 ## Installing GoWorld
 GoWorld requries Go 1.11+ to install.
 ```bash
-go get github.com/xiaonanln/goworld/cmd/...
+go get github.com/dannielwallace/goworld/cmd/...
 ``` 
 
 ## Manage GoWorld Servers
@@ -98,9 +98,9 @@ Reload will reboot game processes with the current executable while preserving a
 ```bash
 $ goworld status examples/chatroom_demo
 > 1 dispatcher running, 1/1 gates running, 1/1 games (examples/chatroom_demo) running
-> 	2763      dispatcher      /home/ubuntu/go/src/github.com/xiaonanln/goworld/components/dispatcher/dispatcher -dispid 1
-> 	2770      chatroom_demo   /home/ubuntu/go/src/github.com/xiaonanln/goworld/examples/chatroom_demo/chatroom_demo -gid 1
-> 	2779      gate            /home/ubuntu/go/src/github.com/xiaonanln/goworld/components/gate/gate -gid 1
+> 	2763      dispatcher      /home/ubuntu/go/src/github.com/dannielwallace/goworld/components/dispatcher/dispatcher -dispid 1
+> 	2770      chatroom_demo   /home/ubuntu/go/src/github.com/dannielwallace/goworld/examples/chatroom_demo/chatroom_demo -gid 1
+> 	2779      gate            /home/ubuntu/go/src/github.com/dannielwallace/goworld/components/gate/gate -gid 1
 ```  
 
 ## Demos
@@ -126,7 +126,7 @@ goworld start examples/chatroom_demo
 **Chatroom Demo Client:**
 
 Chatroom demo client implements the client-server protocol in Javascript.  
-The client for chatroom demo is hosted at [github.com/xiaonanln/goworld-chatroom-demo-client](https://github.com/xiaonanln/goworld-chatroom-demo-client).
+The client for chatroom demo is hosted at [github.com/dannielwallace/goworld-chatroom-demo-client](https://github.com/dannielwallace/goworld-chatroom-demo-client).
 The project was created and built in [Cocos Creater 1.5](http://www.cocos2d-x.org/). 
 
 ### Unity Demo
@@ -156,7 +156,7 @@ goworld start examples/unity_demo
 **Unity Demo Client:**
 
 Unity demo client implements the client-server protocol in C#. 
-The client for unity demo is hosted at [https://github.com/xiaonanln/goworld-unity-demo](https://github.com/xiaonanln/goworld-unity-demo).
+The client for unity demo is hosted at [https://github.com/dannielwallace/goworld-unity-demo](https://github.com/dannielwallace/goworld-unity-demo).
 The project was created and built in [Unity 2017.1](https://unity3d.com/). 
 
 You can try the demo by downloading [GoWorldUnityDemo.zip](https://drive.google.com/file/d/1A1CJCVWFQWa-iMuAoAdHZ4JoXTtU5Q7z/view?usp=sharing). 

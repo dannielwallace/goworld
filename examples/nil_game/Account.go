@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/xiaonanln/goworld/engine/entity"
+	"github.com/dannielwallace/goworld/engine/entity"
 )
 
 // Account 是账号对象类型，用于处理注册、登录逻辑

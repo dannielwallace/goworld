@@ -1,6 +1,6 @@
 package gwutils
 
-import "github.com/xiaonanln/goworld/engine/gwlog"
+import "github.com/dannielwallace/goworld/engine/gwlog"
 
 // CatchPanic calls a function and returns the error if function paniced
 func CatchPanic(f func()) (err interface{}) {

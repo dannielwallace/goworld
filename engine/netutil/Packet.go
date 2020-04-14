@@ -9,9 +9,9 @@ import (
 
 	"sync"
 
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/consts"
-	"github.com/xiaonanln/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/consts"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 )
 
 const (

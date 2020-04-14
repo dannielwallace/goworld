@@ -2,7 +2,7 @@ package gwredis
 
 import (
 	"github.com/garyburd/redigo/redis"
-	"github.com/xiaonanln/goworld/engine/async"
+	"github.com/dannielwallace/goworld/engine/async"
 )
 
 const (

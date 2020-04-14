@@ -1,6 +1,6 @@
 package main
 
-import "github.com/xiaonanln/goworld/engine/entity"
+import "github.com/dannielwallace/goworld/engine/entity"
 
 // MySpace 是一个自定义的场景类型
 //

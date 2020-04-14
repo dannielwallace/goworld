@@ -29,14 +29,14 @@ import (
 	"time"
 
 	"github.com/xiaonanln/goTimer"
-	"github.com/xiaonanln/goworld/components/game"
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/entity"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/engine/kvdb"
-	"github.com/xiaonanln/goworld/engine/post"
-	"github.com/xiaonanln/goworld/engine/service"
-	"github.com/xiaonanln/goworld/engine/storage"
+	"github.com/dannielwallace/goworld/components/game"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/entity"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/kvdb"
+	"github.com/dannielwallace/goworld/engine/post"
+	"github.com/dannielwallace/goworld/engine/service"
+	"github.com/dannielwallace/goworld/engine/storage"
 )
 
 const (
@@ -87,7 +87,7 @@ func RegisterSpace(spacePtr entity.ISpace) {
 }
 
 // RegisterEntity 注册一个对象类型到game中。所注册的对象必须是Entity类型的子类（包含一个匿名Entity字段）。
-// 使用方法可以参考：https://github.com/xiaonanln/goworld/blob/master/examples/unity_demo/unity_demo.go
+// 使用方法可以参考：https://github.com/dannielwallace/goworld/blob/master/examples/unity_demo/unity_demo.go
 func RegisterEntity(typeName string, entityPtr entity.IEntity) *entity.EntityTypeDesc {
 	return entity.RegisterEntity(typeName, entityPtr, false)
 }
@@ -101,7 +101,7 @@ func RegisterService(typeName string, entityPtr entity.IEntity, shardCount int) 
 
 // Run 开始运行game服务。开发者需要为自己的游戏服务器提供一个main模块和main函数，并在main函数里正确初始化GoWorld服务器并启动服务器。
 // 一般来说，开发者需要在main函数中注册相应的Space类型、Service类型、Entity类型，然后调用 goworld.Run() 启动GoWorld服务器即可，可参考：
-// https://github.com/xiaonanln/goworld/blob/master/examples/unity_demo/unity_demo.go
+// https://github.com/dannielwallace/goworld/blob/master/examples/unity_demo/unity_demo.go
 func Run() {
 	game.Run()
 }

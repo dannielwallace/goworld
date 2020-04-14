@@ -3,7 +3,7 @@ package entity
 import (
 	"bytes"
 
-	"github.com/xiaonanln/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/common"
 )
 
 // EntityMap is the data structure for maintaining entity IDs to entities

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/dannielwallace/goworld/components/gate/gate_impl"
 
 	"math/rand"
 	"time"
@@ -18,17 +19,15 @@ import (
 
 	"fmt"
 
-	"path"
-
-	"github.com/xiaonanln/goworld/engine/binutil"
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/config"
-	"github.com/xiaonanln/goworld/engine/dispatchercluster"
-	"github.com/xiaonanln/goworld/engine/dispatchercluster/dispatcherclient"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/engine/netutil"
-	"github.com/xiaonanln/goworld/engine/post"
-	"github.com/xiaonanln/goworld/engine/proto"
+	"github.com/dannielwallace/goworld/engine/binutil"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/config"
+	"github.com/dannielwallace/goworld/engine/dispatchercluster"
+	"github.com/dannielwallace/goworld/engine/dispatchercluster/dispatcherclient"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/netutil"
+	"github.com/dannielwallace/goworld/engine/post"
+	"github.com/dannielwallace/goworld/engine/proto"
 )
 
 var (
@@ -39,7 +38,7 @@ var (
 		runInDaemonMode bool
 		//listenAddr      string
 	}
-	gateService *GateService
+	gateService *gate_impl.GateService
 	signalChan  = make(chan os.Signal, 1)
 )
 
@@ -84,20 +83,13 @@ func main() {
 	}
 	binutil.SetupGWLog(fmt.Sprintf("gate%d", args.gateid), logLevel, gateConfig.LogFile, gateConfig.LogStderr)
 
-	gateService = newGateService()
-	if gateConfig.EncryptConnection {
-		cfgdir := config.GetConfigDir()
-		rsaCert := path.Join(cfgdir, gateConfig.RSACertificate)
-		rsaKey := path.Join(cfgdir, gateConfig.RSAKey)
-		binutil.SetupHTTPServerTLS(gateConfig.HTTPAddr, gateService.handleWebSocketConn, rsaCert, rsaKey)
-	} else {
-		binutil.SetupHTTPServer(gateConfig.HTTPAddr, gateService.handleWebSocketConn)
-	}
+	gateService = gate_impl.NewGateService(args.gateid)
+	binutil.SetupHTTPServer(gateConfig.HTTPAddr, nil)
 
 	dispatchercluster.Initialize(args.gateid, dispatcherclient.GateDispatcherClientType, false, false, &gateDispatcherClientDelegate{})
 	//dispatcherclient.Initialize(&gateDispatcherClientDelegate{}, true)
 	setupSignals()
-	gateService.run() // run gate service in another goroutine
+	gateService.Run() // run gate service in another goroutine
 }
 
 func verifyGateConfig(gateConfig *config.GateConfig) {
@@ -115,10 +107,10 @@ func setupSignals() {
 				// terminating gate ...
 				gwlog.Infof("Terminating gate service ...")
 				post.Post(func() {
-					gateService.terminate()
+					gateService.Terminate()
 				})
 
-				gateService.terminated.Wait()
+				gateService.Terminated.Wait()
 				gwlog.Infof("Gate %d terminated gracefully.", args.gateid)
 				os.Exit(0)
 			} else {
@@ -132,7 +124,7 @@ type gateDispatcherClientDelegate struct {
 }
 
 func (delegate *gateDispatcherClientDelegate) HandleDispatcherClientPacket(msgtype proto.MsgType, packet *netutil.Packet) {
-	gateService.dispatcherClientPacketQueue <- proto.Message{msgtype, packet}
+	gateService.DispatcherClientPacketQueue <- proto.Message{msgtype, packet}
 }
 
 func (delegate *gateDispatcherClientDelegate) HandleDispatcherClientDisconnect() {

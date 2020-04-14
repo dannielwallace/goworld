@@ -1,0 +1,169 @@
+# github.com/BurntSushi/toml v0.3.1
+github.com/BurntSushi/toml
+# github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
+github.com/StackExchange/wmi
+# github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
+github.com/bmizerany/assert
+# github.com/chasex/redis-go-cluster v1.0.0
+github.com/chasex/redis-go-cluster
+# github.com/garyburd/redigo v1.6.0
+github.com/garyburd/redigo/internal
+github.com/garyburd/redigo/redis
+# github.com/go-ini/ini v1.51.0
+github.com/go-ini/ini
+# github.com/go-ole/go-ole v1.2.4
+github.com/go-ole/go-ole
+github.com/go-ole/go-ole/oleutil
+# github.com/go-sql-driver/mysql v1.4.1
+github.com/go-sql-driver/mysql
+# github.com/golang/protobuf v1.3.1
+github.com/golang/protobuf/proto
+# github.com/golang/snappy v0.0.1
+github.com/golang/snappy
+# github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
+github.com/kardianos/osext
+# github.com/klauspost/cpuid v1.2.1
+github.com/klauspost/cpuid
+# github.com/klauspost/reedsolomon v1.9.3
+github.com/klauspost/reedsolomon
+# github.com/kr/pretty v0.1.0
+github.com/kr/pretty
+# github.com/kr/text v0.1.0
+github.com/kr/text
+# github.com/petar/GoLLRB v0.0.0-20190514000832-33fb24c13b99
+github.com/petar/GoLLRB/llrb
+# github.com/pkg/errors v0.9.1
+github.com/pkg/errors
+# github.com/sevlyar/go-daemon v0.1.5
+github.com/sevlyar/go-daemon
+# github.com/shirou/gopsutil v2.19.11+incompatible
+github.com/shirou/gopsutil/cpu
+github.com/shirou/gopsutil/internal/common
+github.com/shirou/gopsutil/mem
+github.com/shirou/gopsutil/net
+github.com/shirou/gopsutil/process
+# github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4
+github.com/shirou/w32
+# github.com/templexxx/cpufeat v0.0.0-20180724012125-cef66df7f161
+github.com/templexxx/cpufeat
+# github.com/templexxx/xor v0.0.0-20181023030647-4e92f724b73b
+github.com/templexxx/xor
+# github.com/tjfoc/gmsm v1.0.1
+github.com/tjfoc/gmsm/sm4
+# github.com/vmihailenco/msgpack v4.0.4+incompatible
+github.com/vmihailenco/msgpack
+github.com/vmihailenco/msgpack/codes
+# github.com/xiaonanln/go-aoi v0.2.0
+github.com/xiaonanln/go-aoi
+# github.com/xiaonanln/go-trie-tst v0.0.0-20171018095208-5b9678d55438
+github.com/xiaonanln/go-trie-tst
+# github.com/xiaonanln/go-xnsyncutil v0.0.5
+github.com/xiaonanln/go-xnsyncutil/xnsyncutil
+# github.com/xiaonanln/goTimer v0.0.3
+github.com/xiaonanln/goTimer
+# github.com/xiaonanln/netconnutil v0.0.0-20200208154411-dc274e29fea7
+github.com/xiaonanln/netconnutil
+# github.com/xiaonanln/typeconv v0.0.4
+github.com/xiaonanln/typeconv
+# github.com/xtaci/kcp-go v5.4.19+incompatible
+github.com/xtaci/kcp-go
+# go.uber.org/atomic v1.5.0
+go.uber.org/atomic
+# go.uber.org/multierr v1.3.0
+go.uber.org/multierr
+# go.uber.org/tools v0.0.0-20190618225709-2cfd321de3ee
+go.uber.org/tools/update-license
+# go.uber.org/zap v1.13.0
+go.uber.org/zap
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
+# golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529
+golang.org/x/crypto/blowfish
+golang.org/x/crypto/cast5
+golang.org/x/crypto/internal/subtle
+golang.org/x/crypto/pbkdf2
+golang.org/x/crypto/salsa20
+golang.org/x/crypto/salsa20/salsa
+golang.org/x/crypto/tea
+golang.org/x/crypto/twofish
+golang.org/x/crypto/xtea
+# golang.org/x/lint v0.0.0-20190930215403-16217165b5de
+golang.org/x/lint
+golang.org/x/lint/golint
+# golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933
+golang.org/x/net/bpf
+golang.org/x/net/context
+golang.org/x/net/internal/iana
+golang.org/x/net/internal/socket
+golang.org/x/net/ipv4
+golang.org/x/net/ipv6
+golang.org/x/net/websocket
+# golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5
+golang.org/x/tools/go/analysis
+golang.org/x/tools/go/analysis/passes/inspect
+golang.org/x/tools/go/ast/astutil
+golang.org/x/tools/go/ast/inspector
+golang.org/x/tools/go/buildutil
+golang.org/x/tools/go/gcexportdata
+golang.org/x/tools/go/internal/gcimporter
+golang.org/x/tools/go/internal/packagesdriver
+golang.org/x/tools/go/packages
+golang.org/x/tools/go/types/objectpath
+golang.org/x/tools/go/types/typeutil
+golang.org/x/tools/internal/fastwalk
+golang.org/x/tools/internal/gopathwalk
+golang.org/x/tools/internal/semver
+golang.org/x/tools/internal/span
+# google.golang.org/appengine v1.6.5
+google.golang.org/appengine
+google.golang.org/appengine/cloudsql
+google.golang.org/appengine/datastore
+google.golang.org/appengine/datastore/internal/cloudkey
+google.golang.org/appengine/datastore/internal/cloudpb
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/app_identity
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/modules
+google.golang.org/appengine/internal/remote_api
+# gopkg.in/eapache/queue.v1 v1.1.0
+gopkg.in/eapache/queue.v1
+# gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
+gopkg.in/mgo.v2
+gopkg.in/mgo.v2/bson
+gopkg.in/mgo.v2/internal/json
+gopkg.in/mgo.v2/internal/sasl
+gopkg.in/mgo.v2/internal/scram
+# honnef.co/go/tools v0.0.1-2019.2.3
+honnef.co/go/tools/arg
+honnef.co/go/tools/cmd/staticcheck
+honnef.co/go/tools/config
+honnef.co/go/tools/deprecated
+honnef.co/go/tools/facts
+honnef.co/go/tools/functions
+honnef.co/go/tools/go/types/typeutil
+honnef.co/go/tools/internal/cache
+honnef.co/go/tools/internal/passes/buildssa
+honnef.co/go/tools/internal/renameio
+honnef.co/go/tools/internal/sharedcheck
+honnef.co/go/tools/lint
+honnef.co/go/tools/lint/lintdsl
+honnef.co/go/tools/lint/lintutil
+honnef.co/go/tools/lint/lintutil/format
+honnef.co/go/tools/loader
+honnef.co/go/tools/printf
+honnef.co/go/tools/simple
+honnef.co/go/tools/ssa
+honnef.co/go/tools/ssautil
+honnef.co/go/tools/staticcheck
+honnef.co/go/tools/staticcheck/vrp
+honnef.co/go/tools/stylecheck
+honnef.co/go/tools/unused
+honnef.co/go/tools/version

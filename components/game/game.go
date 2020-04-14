@@ -2,6 +2,7 @@ package game
 
 import (
 	"flag"
+	"github.com/dannielwallace/goworld/components/game/game_impl"
 
 	"math/rand"
 	"time"
@@ -21,21 +22,21 @@ import (
 
 	"context"
 
-	"github.com/xiaonanln/goworld/components/game/lbc"
-	"github.com/xiaonanln/goworld/engine/binutil"
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/config"
-	"github.com/xiaonanln/goworld/engine/crontab"
-	"github.com/xiaonanln/goworld/engine/dispatchercluster"
-	"github.com/xiaonanln/goworld/engine/dispatchercluster/dispatcherclient"
-	"github.com/xiaonanln/goworld/engine/entity"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/engine/kvdb"
-	"github.com/xiaonanln/goworld/engine/netutil"
-	"github.com/xiaonanln/goworld/engine/post"
-	"github.com/xiaonanln/goworld/engine/proto"
-	"github.com/xiaonanln/goworld/engine/service"
-	"github.com/xiaonanln/goworld/engine/storage"
+	"github.com/dannielwallace/goworld/components/game/lbc"
+	"github.com/dannielwallace/goworld/engine/binutil"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/config"
+	"github.com/dannielwallace/goworld/engine/crontab"
+	"github.com/dannielwallace/goworld/engine/dispatchercluster"
+	"github.com/dannielwallace/goworld/engine/dispatchercluster/dispatcherclient"
+	"github.com/dannielwallace/goworld/engine/entity"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/kvdb"
+	"github.com/dannielwallace/goworld/engine/netutil"
+	"github.com/dannielwallace/goworld/engine/post"
+	"github.com/dannielwallace/goworld/engine/proto"
+	"github.com/dannielwallace/goworld/engine/service"
+	"github.com/dannielwallace/goworld/engine/storage"
 )
 
 var (
@@ -44,7 +45,7 @@ var (
 	logLevel        string
 	restore         bool
 	runInDaemonMode bool
-	gameService     *GameService
+	gameService     *game_impl.GameService
 	signalChan      = make(chan os.Signal, 1)
 	gameCtx         = context.Background()
 )
@@ -109,7 +110,7 @@ func Run() {
 	entity.SetSaveInterval(gameConfig.SaveInterval)
 
 	gwlog.Infof("Start game service ...")
-	gameService = newGameService(gameid)
+	gameService = game_impl.NewGameService(gameid)
 
 	if !restore {
 		gwlog.Infof("Creating nil space ...")
@@ -117,7 +118,7 @@ func Run() {
 	} else {
 		// restoring from freezed states
 		gwlog.Infof("Restoring freezed entities ...")
-		err := restoreFreezedEntities()
+		err := game_impl.RestoreFreezedEntities(gameid)
 		if err != nil {
 			gwlog.Fatalf("Restore from freezed states failed: %+v", err)
 		}
@@ -132,7 +133,7 @@ func Run() {
 
 	service.Setup(gameid)
 	gwlog.Infof("Game service start running ...")
-	gameService.run()
+	gameService.Run()
 }
 
 func setupSignals() {
@@ -146,11 +147,11 @@ func setupSignals() {
 			if sig == syscall.SIGTERM || sig == syscall.SIGINT {
 				// terminating game ...
 				gwlog.Infof("Terminating game service ...")
-				gameService.terminate()
+				gameService.Terminate()
 				waitGameServiceStateSatisfied(func(rs int) bool {
-					return rs != rsTerminating
+					return rs != game_impl.RsTerminating
 				})
-				if gameService.runState.Load() != rsTerminated {
+				if gameService.RunState.Load() != game_impl.RsTerminated {
 					// game service is not terminated successfully, abort
 					gwlog.Errorf("Game service is not terminated successfully, back to running ...")
 					continue
@@ -166,17 +167,17 @@ func setupSignals() {
 				gwlog.Infof("Freezing game service ...")
 
 				post.Post(func() {
-					gameService.startFreeze()
+					gameService.StartFreeze()
 				})
 
 				waitGameServiceStateSatisfied(func(rs int) bool { // wait until not running
-					return rs != rsRunning
+					return rs != game_impl.RsRunning
 				})
 				waitGameServiceStateSatisfied(func(rs int) bool {
-					return rs != rsFreezing
+					return rs != game_impl.RsFreezing
 				})
 
-				if gameService.runState.Load() != rsFreezed {
+				if gameService.RunState.Load() != game_impl.RsFreezed {
 					// game service is not freezed successfully, abort
 					gwlog.Errorf("Game service is not freezed successfully, back to running ...")
 					continue
@@ -196,7 +197,7 @@ func setupSignals() {
 func waitGameServiceStateSatisfied(s func(rs int) bool) {
 	waitCounter := 0
 	for {
-		state := gameService.runState.Load()
+		state := gameService.RunState.Load()
 		if s(state) {
 			break
 		}
@@ -221,7 +222,7 @@ type _GameDispatcherClientDelegate struct {
 var lastWarnGateServiceQueueLen = 0
 
 func (delegate *_GameDispatcherClientDelegate) HandleDispatcherClientPacket(msgtype proto.MsgType, packet *netutil.Packet) {
-	gameService.packetQueue <- proto.Message{ // may block the dispatcher client routine
+	gameService.PacketQueue <- proto.Message{ // may block the dispatcher client routine
 		MsgType: msgtype,
 		Packet:  packet,
 	}
@@ -243,4 +244,9 @@ func (delegate *_GameDispatcherClientDelegate) GetEntityIDsForDispatcher(dispid 
 // GetGameID returns the current Game Server ID
 func GetGameID() uint16 {
 	return gameid
+}
+
+// GetOnlineGames returns all online game IDs
+func GetOnlineGames() common.Uint16Set {
+	return gameService.OnlineGames
 }

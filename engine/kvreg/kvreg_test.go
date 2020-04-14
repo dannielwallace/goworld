@@ -3,7 +3,7 @@ package kvreg
 import (
 	"testing"
 
-	"github.com/xiaonanln/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 )
 
 func init() {

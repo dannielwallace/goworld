@@ -1,6 +1,6 @@
 package entity
 
-import "github.com/xiaonanln/goworld/engine/gwlog"
+import "github.com/dannielwallace/goworld/engine/gwlog"
 
 type attrFlag int
 

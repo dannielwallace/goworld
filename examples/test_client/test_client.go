@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/dannielwallace/goworld/examples/test_client/test_client_impl"
 
 	"sync"
 
@@ -12,10 +13,10 @@ import (
 
 	"os"
 
+	"github.com/dannielwallace/goworld/engine/binutil"
+	"github.com/dannielwallace/goworld/engine/config"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 	"github.com/xiaonanln/goTimer"
-	"github.com/xiaonanln/goworld/engine/binutil"
-	"github.com/xiaonanln/goworld/engine/config"
-	"github.com/xiaonanln/goworld/engine/gwlog"
 )
 
 var (
@@ -35,7 +36,7 @@ var (
 func parseArgs() {
 	flag.BoolVar(&quiet, "quiet", false, "run client quietly with much less output")
 	flag.StringVar(&configFile, "configfile", "", "set config file path")
-	flag.IntVar(&numClients, "N", 1000, "Number of clients")
+	flag.IntVar(&numClients, "N", 2000, "Number of clients")
 	flag.IntVar(&startClientId, "S", 1, "Start ID of clients")
 	flag.StringVar(&serverHost, "server", "localhost", "replace server address")
 	flag.BoolVar(&useWebSocket, "ws", false, "use WebSocket to connect server")
@@ -71,8 +72,10 @@ func main() {
 	wait.Add(numClients)
 	waitAllConnected.Add(numClients)
 	for i := 0; i < numClients; i++ {
-		bot := newClientBot(startClientId+i, useWebSocket, useKCP, noEntitySync, &wait, &waitAllConnected)
-		go bot.run()
+		bot := test_client_impl.NewClientBot(startClientId+i, useWebSocket, useKCP, noEntitySync,
+			&wait, &waitAllConnected, quiet, strictMode)
+		go bot.Run(serverHost)
+		time.Sleep(time.Microsecond * 10)
 	}
 	timer.StartTicks(time.Millisecond * 100)
 	if duration > 0 {

@@ -1,12 +1,12 @@
 package dispatchercluster
 
 import (
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/config"
-	"github.com/xiaonanln/goworld/engine/dispatchercluster/dispatcherclient"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/engine/netutil"
-	"github.com/xiaonanln/goworld/engine/proto"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/config"
+	"github.com/dannielwallace/goworld/engine/dispatchercluster/dispatcherclient"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/netutil"
+	"github.com/dannielwallace/goworld/engine/proto"
 )
 
 var (

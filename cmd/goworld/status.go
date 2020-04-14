@@ -6,8 +6,8 @@ import (
 
 	"fmt"
 
-	"github.com/xiaonanln/goworld/cmd/goworld/process"
-	"github.com/xiaonanln/goworld/engine/config"
+	"github.com/dannielwallace/goworld/cmd/goworld/process"
+	"github.com/dannielwallace/goworld/engine/config"
 )
 
 // ServerStatus represents the status of a server

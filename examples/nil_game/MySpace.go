@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/xiaonanln/goworld"
-	"github.com/xiaonanln/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 )
 
 // MySpace is the custom space type

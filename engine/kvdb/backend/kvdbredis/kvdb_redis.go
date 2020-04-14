@@ -5,7 +5,7 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/pkg/errors"
-	"github.com/xiaonanln/goworld/engine/kvdb/types"
+	"github.com/dannielwallace/goworld/engine/kvdb/types"
 )
 
 const (

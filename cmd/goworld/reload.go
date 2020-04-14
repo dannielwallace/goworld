@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/xiaonanln/goworld/engine/binutil"
-	"github.com/xiaonanln/goworld/engine/config"
+	"github.com/dannielwallace/goworld/engine/binutil"
+	"github.com/dannielwallace/goworld/engine/config"
 )
 
 func reload(sid ServerID) {

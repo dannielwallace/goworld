@@ -3,8 +3,8 @@ package kvdb
 import (
 	"testing"
 
-	"github.com/xiaonanln/goworld/engine/config"
-	"github.com/xiaonanln/goworld/engine/kvdb/types"
+	"github.com/dannielwallace/goworld/engine/config"
+	"github.com/dannielwallace/goworld/engine/kvdb/types"
 )
 
 func init() {

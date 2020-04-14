@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/xiaonanln/goTimer"
-	"github.com/xiaonanln/goworld"
-	"github.com/xiaonanln/goworld/engine/entity"
-	"github.com/xiaonanln/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld"
+	"github.com/dannielwallace/goworld/engine/entity"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 )
 
 const (

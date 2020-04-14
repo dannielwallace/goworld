@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/sevlyar/go-daemon"
-	"github.com/xiaonanln/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 )
 
 func Daemonize() *daemon.Context {

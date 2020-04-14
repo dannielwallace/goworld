@@ -1,4 +1,4 @@
-module github.com/xiaonanln/goworld
+module github.com/dannielwallace/goworld
 
 go 1.13
 
@@ -11,12 +11,12 @@ require (
 	github.com/go-ini/ini v1.51.0
 	github.com/go-ole/go-ole v1.2.4
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/golang/snappy v0.0.1
+	github.com/golang/snappy v0.0.1 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/klauspost/reedsolomon v1.9.3 // indirect
 	github.com/petar/GoLLRB v0.0.0-20190514000832-33fb24c13b99
-	github.com/pierrec/lz4 v2.3.0+incompatible
+	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sevlyar/go-daemon v0.1.5
 	github.com/shirou/gopsutil v2.19.11+incompatible

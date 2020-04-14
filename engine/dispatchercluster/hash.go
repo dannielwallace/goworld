@@ -1,7 +1,7 @@
 package dispatchercluster
 
 import (
-	"github.com/xiaonanln/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/common"
 )
 
 func hashEntityID(id common.EntityID) int {

@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/xiaonanln/goTimer"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/engine/gwutils"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/gwutils"
 )
 
 const (

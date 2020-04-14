@@ -1,12 +1,13 @@
 package main
 
 import (
+	"github.com/dannielwallace/goworld/examples/test_game/test_game_impl"
 	"time"
 
+	"github.com/dannielwallace/goworld"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/ext/pubsub"
 	"github.com/xiaonanln/goTimer"
-	"github.com/xiaonanln/goworld"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/ext/pubsub"
 )
 
 var (
@@ -23,22 +24,24 @@ func init() {
 }
 
 func main() {
-	goworld.RegisterSpace(&MySpace{}) // Register the space type
+	goworld.RegisterSpace(&test_game_impl.MySpace{
+		GameReadyCallback: checkServerStarted,
+	}) // Register the space type
 
 	// Register each entity types
-	goworld.RegisterEntity("Account", &Account{})
-	goworld.RegisterEntity("AOITester", &AOITester{})
-	goworld.RegisterService("OnlineService", &OnlineService{}, 3)
-	goworld.RegisterService("SpaceService", &SpaceService{}, 3)
+	goworld.RegisterEntity("Account", &test_game_impl.Account{})
+	goworld.RegisterEntity("AOITester", &test_game_impl.AOITester{})
+	goworld.RegisterService("OnlineService", &test_game_impl.OnlineService{}, 3)
+	goworld.RegisterService("SpaceService", &test_game_impl.SpaceService{}, 3)
 	// todo: implement sharding for MailService. Currently, MailService only allows 1 shard
-	goworld.RegisterService("MailService", &MailService{}, 1)
+	goworld.RegisterService("MailService", &test_game_impl.MailService{}, 1)
 
 	pubsub.RegisterService(3)
 
 	// Register Monster type and define attributes
-	goworld.RegisterEntity("Monster", &Monster{})
+	goworld.RegisterEntity("Monster", &test_game_impl.Monster{})
 	// Register Avatar type and define attributes
-	goworld.RegisterEntity("Avatar", &Avatar{})
+	goworld.RegisterEntity("Avatar", &test_game_impl.Avatar{})
 
 	// Run the game server
 	goworld.Run()

@@ -3,9 +3,9 @@ package entity
 import (
 	"strconv"
 
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/engine/uuid"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/uuid"
 )
 
 // CreateSpaceLocally creates a space in the local game server

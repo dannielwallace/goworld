@@ -12,11 +12,11 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/xiaonanln/goTimer"
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/entity"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/engine/gwvar"
-	"github.com/xiaonanln/goworld/engine/kvreg"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/entity"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/gwvar"
+	"github.com/dannielwallace/goworld/engine/kvreg"
 )
 
 const (

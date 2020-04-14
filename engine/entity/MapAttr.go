@@ -5,7 +5,7 @@ import (
 
 	"fmt"
 
-	"github.com/xiaonanln/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 )
 
 // MapAttr is a map attribute containing muiltiple attributes indexed by string keys

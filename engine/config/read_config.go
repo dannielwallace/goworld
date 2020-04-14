@@ -19,8 +19,8 @@ import (
 
 	"github.com/go-ini/ini"
 	"github.com/pkg/errors"
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 )
 
 const (

@@ -3,7 +3,7 @@ package entity
 import (
 	"reflect"
 
-	"github.com/xiaonanln/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/common"
 )
 
 var (

@@ -4,9 +4,9 @@ import (
 	"github.com/xiaonanln/netconnutil"
 	"net"
 
-	"github.com/xiaonanln/goworld/engine/consts"
-	"github.com/xiaonanln/goworld/engine/gwlog"
-	"github.com/xiaonanln/goworld/engine/proto"
+	"github.com/dannielwallace/goworld/engine/consts"
+	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/proto"
 )
 
 type DispatcherClientType int

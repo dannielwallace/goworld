@@ -10,10 +10,10 @@ import (
 
 	"os"
 
-	"github.com/xiaonanln/goworld/engine/kvdb/backend/kvdb_mongodb"
-	"github.com/xiaonanln/goworld/engine/kvdb/backend/kvdbmysql"
-	"github.com/xiaonanln/goworld/engine/kvdb/backend/kvdbredis"
-	. "github.com/xiaonanln/goworld/engine/kvdb/types"
+	"github.com/dannielwallace/goworld/engine/kvdb/backend/kvdb_mongodb"
+	"github.com/dannielwallace/goworld/engine/kvdb/backend/kvdbmysql"
+	"github.com/dannielwallace/goworld/engine/kvdb/backend/kvdbredis"
+	. "github.com/dannielwallace/goworld/engine/kvdb/types"
 )
 
 func TestMongoBackendSet(t *testing.T) {

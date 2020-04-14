@@ -3,8 +3,8 @@ package entitystoragefilesystem
 import (
 	"testing"
 
-	"github.com/xiaonanln/goworld/engine/common"
-	"github.com/xiaonanln/goworld/engine/gwlog"
+	"github.com/dannielwallace/goworld/engine/common"
+	"github.com/dannielwallace/goworld/engine/gwlog"
 )
 
 func TestFileSystemEntityStorage(t *testing.T) {
