@@ -31,8 +31,6 @@ import (
 	"github.com/dannielwallace/goworld/engine/dispatchercluster/dispatcherclient"
 	"github.com/dannielwallace/goworld/engine/gwlog"
 	"github.com/dannielwallace/goworld/engine/kvdb"
-	"github.com/dannielwallace/goworld/engine/netutil"
-	"github.com/dannielwallace/goworld/engine/proto"
 )
 
 var (
@@ -112,7 +110,8 @@ func main() {
 	}
 
 	gwlog.Infof("Start dispatchercluster ...")
-	dispatchercluster.Initialize(gameid, dispatcherclient.GameDispatcherClientType, restore, gameConfig.BanBootEntity, &_GameDispatcherClientDelegate{})
+	gmp := game_impl.NewGameMsgProcessor(gameService)
+	dispatchercluster.Initialize(gameid, dispatcherclient.GameDispatcherClientType, restore, gameConfig.BanBootEntity, gmp)
 
 	gamelbc.Initialize(gameCtx, time.Second*1)
 
@@ -165,20 +164,6 @@ func waitGameServiceStateSatisfied(s func(rs int) bool) {
 		}
 		time.Sleep(time.Millisecond * 10)
 	}
-}
-
-type _GameDispatcherClientDelegate struct {
-}
-
-var lastWarnGateServiceQueueLen = 0
-
-func (delegate *_GameDispatcherClientDelegate) HandleDispatcherClientPacket(msgType proto.MsgType, packet *netutil.Packet) {
-	// may block the dispatcher client routine
-	gameService.AddMsgPacket(msgType, packet)
-}
-
-func (delegate *_GameDispatcherClientDelegate) HandleDispatcherClientDisconnect() {
-	gwlog.Errorf("Disconnected from dispatcher, try reconnecting ...")
 }
 
 // GetGameID returns the current Game Server ID
