@@ -47,7 +47,7 @@ func Initialize() {
 	}
 
 	gwlog.Infof("KVDB initializing, config:\n%s", config.DumpPretty(kvdbCfg))
-	assureKVDBEngineReady()
+	_ = assureKVDBEngineReady()
 }
 
 func assureKVDBEngineReady() (err error) {

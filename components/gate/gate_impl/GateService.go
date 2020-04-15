@@ -191,7 +191,7 @@ func (gs *GateService) onClientProxyClose(cp *ClientProxy) {
 func (gs *GateService) handleClientProxyPacket(cp *ClientProxy, msgType proto.MsgType, pkt *netutil.Packet) {
 	cp.m_heartbeatTime = time.Now()
 
-	if msgType > proto.MT_REDIRECT_TO_GS_START && msgType < proto.MT_REDIRECT_TO_GS_END {
+	if msgType >= proto.MT_REDIRECT_TO_GS_START && msgType <= proto.MT_REDIRECT_TO_GS_END {
 		gs.handleClientMsgDirect2GS(cp, pkt)
 	} else {
 		gwlog.Errorf("unknown message type from client:[%v], msgType:[%d], try 2 close this connection", cp.m_clientId, msgType)

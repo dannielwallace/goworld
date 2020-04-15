@@ -60,10 +60,6 @@ func ClientIDToDispatcherID(clientId common.ClientID) uint16 {
 	return uint16((hashClientID(clientId) % dispatcherNum) + 1)
 }
 
-func SrvIDToDispatcherID(srvid string) uint16 {
-	return uint16((hashSrvID(srvid) % dispatcherNum) + 1)
-}
-
 func SelectByClientID(clientId common.ClientID) *dispatcherclient.DispatcherClient {
 	idx := hashClientID(clientId) % dispatcherNum
 	return dispatcherConns[idx].GetDispatcherClientForSend()
@@ -76,9 +72,4 @@ func SelectByGateID(gateid uint16) *dispatcherclient.DispatcherClient {
 
 func SelectByDispatcherID(dispid uint16) *dispatcherclient.DispatcherClient {
 	return dispatcherConns[dispid-1].GetDispatcherClientForSend()
-}
-
-func SelectBySrvID(srvid string) *dispatcherclient.DispatcherClient {
-	idx := hashSrvID(srvid) % dispatcherNum
-	return dispatcherConns[idx].GetDispatcherClientForSend()
 }

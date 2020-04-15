@@ -42,7 +42,7 @@ var (
 func parseArgs() {
 	var gateIdArg int
 	flag.IntVar(&gateIdArg, "gid", 0, "set gateid")
-	flag.StringVar(&args.configFile, "configfile", "", "set config file path")
+	flag.StringVar(&args.configFile, "c", "", "set config file path")
 	flag.StringVar(&args.logLevel, "log", "", "set log level, will override log level in config")
 	flag.BoolVar(&args.runInDaemonMode, "d", false, "run in daemon mode")
 	//flag.StringVar(&args.listenAddr, "listen-addr", "", "set listen address for gate, overriding listen_addr in config file")
@@ -69,7 +69,6 @@ func main() {
 	}
 
 	gateConfig := config.GetGate(args.gateid)
-	verifyGateConfig(gateConfig)
 	if gateConfig.GoMaxProcs > 0 {
 		gwlog.Infof("SET GOMAXPROCS = %d", gateConfig.GoMaxProcs)
 		runtime.GOMAXPROCS(gateConfig.GoMaxProcs)
@@ -86,9 +85,6 @@ func main() {
 	dispatchercluster.Initialize(args.gateid, dispatcherclient.GateDispatcherClientType, false, false, dispatcherCliInst)
 	setupSignals()
 	gateService.Run() // run gate service in another goroutine
-}
-
-func verifyGateConfig(gateConfig *config.GateConfig) {
 }
 
 func setupSignals() {

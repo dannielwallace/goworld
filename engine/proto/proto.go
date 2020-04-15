@@ -15,12 +15,12 @@ type Message struct {
 // 0 ~ 999, client 2 gs directly, not care the content
 const (
 	MT_REDIRECT_TO_GS_START = 1 + iota
-	MT_REDIRECT_TO_GS_END   = 999
+	MT_REDIRECT_TO_GS_END   = 499
 )
 
 const (
 	// MT_INVALID is the invalid message type
-	MT_INVALID = 1000 + iota
+	MT_INVALID = 500 + iota
 	// MT_SET_GAME_ID is a message type for game
 	MT_SET_GAME_ID
 	// MT_SET_GATE_ID is a message type for gate
@@ -51,6 +51,8 @@ const (
 	MT_NOTIFY_DEPLOYMENT_READY
 	// MT_GAME_LBC_INFO contains game load balacing info
 	MT_GAME_LBC_INFO
+
+	MT_MISC_END = 999
 )
 
 // Alias message types

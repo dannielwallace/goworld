@@ -16,9 +16,9 @@ import (
 
 type dispatcherClientProxy struct {
 	*proto.GoWorldConnection
-	owner  *DispatcherService
-	gameid uint16
-	gateid uint16
+	m_dispacherSrv *DispatcherService
+	gameid         uint16
+	gateid         uint16
 }
 
 func newDispatcherClientProxy(owner *DispatcherService, conn net.Conn) *dispatcherClientProxy {
@@ -27,7 +27,7 @@ func newDispatcherClientProxy(owner *DispatcherService, conn net.Conn) *dispatch
 
 	dcp := &dispatcherClientProxy{
 		GoWorldConnection: gwc,
-		owner:             owner,
+		m_dispacherSrv:    owner,
 	}
 	dcp.SetAutoFlush(consts.DISPATCHER_CLIENT_PROXY_WRITE_FLUSH_INTERVAL)
 	return dcp
@@ -38,7 +38,7 @@ func (dcp *dispatcherClientProxy) serve() {
 	defer func() {
 		dcp.Close()
 		post.Post(func() {
-			dcp.owner.handleDispatcherClientDisconnect(dcp)
+			dcp.m_dispacherSrv.handleDispatcherClientDisconnect(dcp)
 		})
 		err := recover()
 		if err != nil && !netutil.IsConnectionError(err) {
@@ -48,8 +48,8 @@ func (dcp *dispatcherClientProxy) serve() {
 
 	gwlog.Infof("New dispatcher client: %s", dcp)
 	for {
-		var msgtype proto.MsgType
-		pkt, err := dcp.Recv(&msgtype)
+		var msgType proto.MsgType
+		pkt, err := dcp.Recv(&msgType)
 
 		if err != nil {
 			if gwioutil.IsTimeoutError(err) {
@@ -67,7 +67,7 @@ func (dcp *dispatcherClientProxy) serve() {
 		//}
 
 		// pass the packet to the dispatcher service
-		dcp.owner.m_msgQueue <- dispatcherMessage{dcp, proto.Message{msgtype, pkt}}
+		dcp.m_dispacherSrv.AddMsgPacket(dcp, msgType, pkt)
 	}
 }
 

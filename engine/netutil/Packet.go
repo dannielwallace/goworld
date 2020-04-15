@@ -357,6 +357,17 @@ func (p *Packet) ReadBytes(size uint32) []byte {
 	return bytes
 }
 
+// PeekLastBytes peek bytes from the end of unread payload
+func (p *Packet) PeekLastBytes(size uint32) []byte {
+	payloadLen := uint32(len(p.bytes))
+	if _PREPAYLOAD_SIZE + size > payloadLen {
+		gwlog.Panicf("Packet %p bytes is %d, but peek %d", p, payloadLen, size)
+	}
+
+	bytes := p.bytes[payloadLen - size : ] // bytes are not copied
+	return bytes
+}
+
 func (p *Packet) AppendMsgType(msgType common.MsgType) {
 	p.AppendUint16(uint16(msgType))
 }
@@ -376,6 +387,10 @@ func (p *Packet) AppendClientID(id common.ClientID) {
 // ReadClientID reads one ClientID from the beginning of unread  payload
 func (p *Packet) ReadClientID() common.ClientID {
 	return common.ClientID(p.ReadBytes(common.CLIENTID_LENGTH))
+}
+
+func (p *Packet) PeekClientIDFromEnd() common.ClientID {
+	return common.ClientID(p.PeekLastBytes(common.CLIENTID_LENGTH))
 }
 
 // ReadVarStr reads a varsize string from the beginning of unread  payload

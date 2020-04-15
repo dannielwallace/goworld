@@ -6,21 +6,21 @@ import (
 	"github.com/dannielwallace/goworld/engine/proto"
 )
 
-type GameMsgProcessor struct {
+type GameDispacherClient struct {
 	m_gameService *GameService
 }
 
-func NewGameMsgProcessor(gameService *GameService) *GameMsgProcessor {
-	return &GameMsgProcessor{
+func NewGameMsgProcessor(gameService *GameService) *GameDispacherClient {
+	return &GameDispacherClient{
 		m_gameService: gameService,
 	}
 }
 
-func (gmp *GameMsgProcessor) HandleDispatcherClientPacket(msgType proto.MsgType, packet *netutil.Packet) {
+func (gmp *GameDispacherClient) HandleDispatcherClientPacket(msgType proto.MsgType, packet *netutil.Packet) {
 	// may block the dispatcher client routine
 	gmp.m_gameService.AddMsgPacket(msgType, packet)
 }
 
-func (delegate *GameMsgProcessor) HandleDispatcherClientDisconnect() {
+func (delegate *GameDispacherClient) HandleDispatcherClientDisconnect() {
 	gwlog.Errorf("Disconnected from dispatcher, try reconnecting ...")
 }
