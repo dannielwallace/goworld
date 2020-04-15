@@ -15,7 +15,8 @@ var (
 	gid             uint16
 )
 
-func Initialize(_gid uint16, dctype dispatcherclient.DispatcherClientType, isRestoreGame, isBanBootEntity bool, delegate dispatcherclient.IDispatcherClientDelegate) {
+func Initialize(_gid uint16, dctype dispatcherclient.DispatcherClientType, isRestoreGame, isBanBootEntity bool,
+	delegate dispatcherclient.IDispatcherClientDelegate) {
 	gid = _gid
 	if gid == 0 {
 		gwlog.Fatalf("gid is 0")
@@ -36,19 +37,8 @@ func Initialize(_gid uint16, dctype dispatcherclient.DispatcherClientType, isRes
 	}
 }
 
-func SendNotifyDestroyEntity(id common.EntityID) error {
-	return SelectByEntityID(id).SendNotifyDestroyEntity(id)
-}
-
-func SendMigrateRequest(entityID common.EntityID, spaceID common.EntityID, spaceGameID uint16) error {
-	return SelectByEntityID(entityID).SendMigrateRequest(entityID, spaceID, spaceGameID)
-}
-
-func SendRealMigrate(eid common.EntityID, targetGame uint16, data []byte) error {
-	return SelectByEntityID(eid).SendRealMigrate(eid, targetGame, data)
-}
-func SendCallFilterClientProxies(op proto.FilterClientsOpType, key, val string, method string, args []interface{}) {
-	pkt := proto.AllocCallFilterClientProxiesPacket(op, key, val, method, args)
+func SendCallFilterClientProxies(op proto.FilterClientsOpType, key, val string, method string) {
+	pkt := proto.AllocCallFilterClientProxiesPacket(op, key, val, method)
 	broadcast(pkt)
 	pkt.Release()
 	return
@@ -60,61 +50,22 @@ func broadcast(packet *netutil.Packet) {
 	}
 }
 
-func SendNotifyCreateEntity(id common.EntityID) error {
-	if gid != 0 {
-		return SelectByEntityID(id).SendNotifyCreateEntity(id)
-	} else {
-		// goes here when creating nil space or restoring freezed entities
-		return nil
-	}
-}
-
-func SendLoadEntityAnywhere(typeName string, entityID common.EntityID) error {
-	return SelectByEntityID(entityID).SendLoadEntitySomewhere(typeName, entityID, 0)
-}
-
-func SendLoadEntityOnGame(typeName string, entityID common.EntityID, gameid uint16) error {
-	return SelectByEntityID(entityID).SendLoadEntitySomewhere(typeName, entityID, gameid)
-}
-
-func SendCreateEntitySomewhere(gameid uint16, entityid common.EntityID, typeName string, data map[string]interface{}) error {
-	return SelectByEntityID(entityid).SendCreateEntitySomewhere(gameid, entityid, typeName, data)
-}
-
-func SendGameLBCInfo(lbcinfo proto.GameLBCInfo) {
-	packet := proto.AllocGameLBCInfoPacket(lbcinfo)
+func SendGameLBCInfo(lbcCpuUsageInPercent uint16) {
+	packet := proto.AllocGameLBCInfoPacket(lbcCpuUsageInPercent)
 	broadcast(packet)
 	packet.Release()
 }
 
-func SendStartFreezeGame() {
-	pkt := proto.AllocStartFreezeGamePacket()
-	broadcast(pkt)
-	pkt.Release()
-	return
-}
-
-func SendKvregRegister(srvid string, info string, force bool) {
-	SelectBySrvID(srvid).SendKvregRegister(srvid, info, force)
-}
-
-func SendCallNilSpaces(exceptGameID uint16, method string, args []interface{}) {
-	// construct one packet for multiple sending
-	packet := proto.AllocCallNilSpacesPacket(exceptGameID, method, args)
-	broadcast(packet)
-	packet.Release()
-}
-
-func EntityIDToDispatcherID(entityid common.EntityID) uint16 {
-	return uint16((hashEntityID(entityid) % dispatcherNum) + 1)
+func ClientIDToDispatcherID(clientId common.ClientID) uint16 {
+	return uint16((hashClientID(clientId) % dispatcherNum) + 1)
 }
 
 func SrvIDToDispatcherID(srvid string) uint16 {
 	return uint16((hashSrvID(srvid) % dispatcherNum) + 1)
 }
 
-func SelectByEntityID(entityid common.EntityID) *dispatcherclient.DispatcherClient {
-	idx := hashEntityID(entityid) % dispatcherNum
+func SelectByClientID(clientId common.ClientID) *dispatcherclient.DispatcherClient {
+	idx := hashClientID(clientId) % dispatcherNum
 	return dispatcherConns[idx].GetDispatcherClientForSend()
 }
 
@@ -130,8 +81,4 @@ func SelectByDispatcherID(dispid uint16) *dispatcherclient.DispatcherClient {
 func SelectBySrvID(srvid string) *dispatcherclient.DispatcherClient {
 	idx := hashSrvID(srvid) % dispatcherNum
 	return dispatcherConns[idx].GetDispatcherClientForSend()
-}
-
-func Select(dispidx int) *dispatcherclient.DispatcherClient {
-	return dispatcherConns[dispidx].GetDispatcherClientForSend()
 }

@@ -67,7 +67,7 @@ func (dcp *dispatcherClientProxy) serve() {
 		//}
 
 		// pass the packet to the dispatcher service
-		dcp.owner.messageQueue <- dispatcherMessage{dcp, proto.Message{msgtype, pkt}}
+		dcp.owner.m_msgQueue <- dispatcherMessage{dcp, proto.Message{msgtype, pkt}}
 	}
 }
 

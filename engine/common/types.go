@@ -1,33 +1,11 @@
 package common
 
 import (
-	"github.com/dannielwallace/goworld/engine/gwlog"
 	"github.com/dannielwallace/goworld/engine/uuid"
 )
 
-// ENTITYID_LENGTH is the length of Entity IDs
-const ENTITYID_LENGTH = uuid.UUID_LENGTH
-
-// EntityID type
-type EntityID string
-
-// IsNil returns if EntityID is nil
-func (id EntityID) IsNil() bool {
-	return id == ""
-}
-
-// GenEntityID generates a new EntityID
-func GenEntityID() EntityID {
-	return EntityID(uuid.GenUUID())
-}
-
-// MustEntityID assures a string to be EntityID
-func MustEntityID(id string) EntityID {
-	if len(id) != ENTITYID_LENGTH {
-		gwlog.Panicf("%s of len %d is not a valid entity ID (len=%d)", id, len(id), ENTITYID_LENGTH)
-	}
-	return EntityID(id)
-}
+// MsgType is the type of message types
+type MsgType uint16
 
 // ClientID type
 type ClientID string

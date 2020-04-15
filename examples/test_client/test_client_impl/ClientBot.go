@@ -554,7 +554,7 @@ func (bot *ClientBot) CallServer(id common.EntityID, method string, args []inter
 	if !bot.m_bQuite {
 		gwlog.Debugf("%s call server: %s.%s%v", bot, id, method, args)
 	}
-	bot.conn.SendCallEntityMethodFromClient(id, method, args)
+	//bot.conn.SendCallEntityMethodFromClient(id, method, args)
 }
 
 // OnEnterSpace is called when player enters space

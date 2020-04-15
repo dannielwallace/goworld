@@ -10,8 +10,6 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"github.com/pkg/errors"
-	"github.com/dannielwallace/goworld/engine/common"
 	"github.com/dannielwallace/goworld/engine/config"
 	"github.com/dannielwallace/goworld/engine/consts"
 	"github.com/dannielwallace/goworld/engine/gwioutil"
@@ -19,6 +17,7 @@ import (
 	"github.com/dannielwallace/goworld/engine/gwutils"
 	"github.com/dannielwallace/goworld/engine/netutil"
 	"github.com/dannielwallace/goworld/engine/proto"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -76,9 +75,9 @@ func (dcm *DispatcherConnMgr) assureConnected() *DispatcherClient {
 		}
 		dcm.setDispatcherClient(dc)
 		if dcm.dctype == GameDispatcherClientType {
-			dc.SendSetGameID(dcm.gid, dcm.isReconnect, dcm.isRestoreGame, dcm.isBanBootEntity, dcm.delegate.GetEntityIDsForDispatcher(dcm.dispid))
+			_ = dc.SendSetGameID(dcm.gid, dcm.isReconnect, dcm.isRestoreGame, dcm.isBanBootEntity)
 		} else {
-			dc.SendSetGateID(dcm.gid)
+			_ = dc.SendSetGateID(dcm.gid)
 		}
 		dcm.isReconnect = true
 
@@ -94,8 +93,8 @@ func (dcm *DispatcherConnMgr) connectDispatchClient() (*DispatcherClient, error)
 		return nil, err
 	}
 	tcpConn := conn.(*net.TCPConn)
-	tcpConn.SetReadBuffer(consts.DISPATCHER_CLIENT_READ_BUFFER_SIZE)
-	tcpConn.SetWriteBuffer(consts.DISPATCHER_CLIENT_WRITE_BUFFER_SIZE)
+	_ = tcpConn.SetReadBuffer(consts.DISPATCHER_CLIENT_READ_BUFFER_SIZE)
+	_ = tcpConn.SetWriteBuffer(consts.DISPATCHER_CLIENT_WRITE_BUFFER_SIZE)
 	dc := newDispatcherClient(dcm.dctype, conn, dcm.isReconnect, dcm.isRestoreGame)
 	return dc, nil
 }
@@ -104,7 +103,6 @@ func (dcm *DispatcherConnMgr) connectDispatchClient() (*DispatcherClient, error)
 type IDispatcherClientDelegate interface {
 	HandleDispatcherClientPacket(msgtype proto.MsgType, packet *netutil.Packet)
 	HandleDispatcherClientDisconnect()
-	GetEntityIDsForDispatcher(dispid uint16) []common.EntityID
 }
 
 // Initialize the dispatcher client, only called by engine
@@ -133,7 +131,7 @@ func (dcm *DispatcherConnMgr) serveDispatcherClient() {
 			}
 
 			gwlog.TraceError("serveDispatcherClient: RecvMsgPacket error: %s", err.Error())
-			dc.Close()
+			_ = dc.Close()
 			dcm.delegate.HandleDispatcherClientDisconnect()
 			time.Sleep(_LOOP_DELAY_ON_DISPATCHER_CLIENT_ERROR)
 			continue

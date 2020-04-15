@@ -4,7 +4,7 @@ import (
 	"github.com/dannielwallace/goworld/engine/common"
 )
 
-func hashEntityID(id common.EntityID) int {
+func hashClientID(id common.ClientID) int {
 	// hash EntityID to dispatcher shard index: use least 2 bytes
 	b1 := id[14]
 	b2 := id[15]

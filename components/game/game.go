@@ -29,14 +29,10 @@ import (
 	"github.com/dannielwallace/goworld/engine/crontab"
 	"github.com/dannielwallace/goworld/engine/dispatchercluster"
 	"github.com/dannielwallace/goworld/engine/dispatchercluster/dispatcherclient"
-	"github.com/dannielwallace/goworld/engine/entity"
 	"github.com/dannielwallace/goworld/engine/gwlog"
 	"github.com/dannielwallace/goworld/engine/kvdb"
 	"github.com/dannielwallace/goworld/engine/netutil"
-	"github.com/dannielwallace/goworld/engine/post"
 	"github.com/dannielwallace/goworld/engine/proto"
-	"github.com/dannielwallace/goworld/engine/service"
-	"github.com/dannielwallace/goworld/engine/storage"
 )
 
 var (
@@ -98,7 +94,7 @@ func Run() {
 	binutil.SetupGWLog(fmt.Sprintf("game%d", gameid), logLevel, gameConfig.LogFile, gameConfig.LogStderr)
 
 	gwlog.Infof("Initializing storage ...")
-	storage.Initialize()
+	//storage.Initialize()
 	gwlog.Infof("Initializing KVDB ...")
 	kvdb.Initialize()
 	gwlog.Infof("Initializing crontab ...")
@@ -107,21 +103,12 @@ func Run() {
 	gwlog.Infof("Setup http server ...")
 	binutil.SetupHTTPServer(gameConfig.HTTPAddr, nil)
 
-	entity.SetSaveInterval(gameConfig.SaveInterval)
-
 	gwlog.Infof("Start game service ...")
 	gameService = game_impl.NewGameService(gameid)
 
 	if !restore {
 		gwlog.Infof("Creating nil space ...")
-		entity.CreateNilSpace(gameid) // create the nil space
-	} else {
-		// restoring from freezed states
-		gwlog.Infof("Restoring freezed entities ...")
-		err := game_impl.RestoreFreezedEntities(gameid)
-		if err != nil {
-			gwlog.Fatalf("Restore from freezed states failed: %+v", err)
-		}
+		//entity.CreateNilSpace(gameid) // create the nil space
 	}
 
 	gwlog.Infof("Start dispatchercluster ...")
@@ -131,7 +118,6 @@ func Run() {
 
 	setupSignals()
 
-	service.Setup(gameid)
 	gwlog.Infof("Game service start running ...")
 	gameService.Run()
 }
@@ -139,7 +125,7 @@ func Run() {
 func setupSignals() {
 	gwlog.Infof("Setup signals ...")
 	signal.Ignore(syscall.Signal(12), syscall.SIGPIPE, syscall.Signal(10))
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM, binutil.FreezeSignal)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		for {
@@ -160,32 +146,6 @@ func setupSignals() {
 				waitEntityStorageFinish()
 
 				gwlog.Infof("Game %d shutdown gracefully.", gameid)
-				os.Exit(0)
-			} else if sig == binutil.FreezeSignal {
-				// SIGHUP => dump game and close
-				// freezing game ...
-				gwlog.Infof("Freezing game service ...")
-
-				post.Post(func() {
-					gameService.StartFreeze()
-				})
-
-				waitGameServiceStateSatisfied(func(rs int) bool { // wait until not running
-					return rs != game_impl.RsRunning
-				})
-				waitGameServiceStateSatisfied(func(rs int) bool {
-					return rs != game_impl.RsFreezing
-				})
-
-				if gameService.RunState.Load() != game_impl.RsFreezed {
-					// game service is not freezed successfully, abort
-					gwlog.Errorf("Game service is not freezed successfully, back to running ...")
-					continue
-				}
-
-				waitEntityStorageFinish()
-
-				gwlog.Infof("Game %d freezed gracefully.", gameid)
 				os.Exit(0)
 			} else {
 				gwlog.Errorf("unexpected signal: %s", sig)
@@ -212,7 +172,7 @@ func waitGameServiceStateSatisfied(s func(rs int) bool) {
 func waitEntityStorageFinish() {
 	// wait until entity storage's queue is empty
 	gwlog.Infof("Closing Entity Storage ...")
-	storage.Shutdown()
+	//storage.Shutdown()
 	gwlog.Infof("*** DB OK ***")
 }
 
@@ -230,15 +190,6 @@ func (delegate *_GameDispatcherClientDelegate) HandleDispatcherClientPacket(msgt
 
 func (delegate *_GameDispatcherClientDelegate) HandleDispatcherClientDisconnect() {
 	gwlog.Errorf("Disconnected from dispatcher, try reconnecting ...")
-}
-
-func (delegate *_GameDispatcherClientDelegate) GetEntityIDsForDispatcher(dispid uint16) (eids []common.EntityID) {
-	for eid := range entity.Entities() {
-		if dispatchercluster.EntityIDToDispatcherID(eid) == dispid {
-			eids = append(eids, eid)
-		}
-	}
-	return
 }
 
 // GetGameID returns the current Game Server ID

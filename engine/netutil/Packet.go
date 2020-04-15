@@ -2,7 +2,6 @@ package netutil
 
 import (
 	"encoding/binary"
-
 	"unsafe"
 
 	"sync/atomic"
@@ -48,7 +47,6 @@ var (
 )
 
 func init() {
-
 	if _MIN_PAYLOAD_CAP >= consts.PACKET_PAYLOAD_LEN_COMPRESS_THRESHOLD {
 		gwlog.Fatalf("_MIN_PAYLOAD_CAP should be smaller than PACKET_PAYLOAD_LEN_COMPRESS_THRESHOLD")
 	}
@@ -359,17 +357,12 @@ func (p *Packet) ReadBytes(size uint32) []byte {
 	return bytes
 }
 
-// AppendEntityID appends one Entity ID to the end of payload
-func (p *Packet) AppendEntityID(id common.EntityID) {
-	if len(id) != common.ENTITYID_LENGTH {
-		gwlog.Panicf("AppendEntityID: invalid entity id: %s", id)
-	}
-	p.AppendBytes([]byte(id))
+func (p *Packet) AppendMsgType(msgType common.MsgType) {
+	p.AppendUint16(uint16(msgType))
 }
 
-// ReadEntityID reads one EntityID from the beginning of unread  payload
-func (p *Packet) ReadEntityID() common.EntityID {
-	return common.EntityID(p.ReadBytes(common.ENTITYID_LENGTH))
+func (p *Packet) ReadMsgType() common.MsgType {
+	return common.MsgType(p.ReadUint16())
 }
 
 // AppendClientID appends one Client ID to the end of payload
@@ -416,36 +409,6 @@ func (p *Packet) ReadMapStringString() map[string]string {
 	return m
 }
 
-// AppendData appends one data of any type to the end of payload
-func (p *Packet) AppendData(msg interface{}) {
-	dataBytes, err := MSG_PACKER.PackMsg(msg, nil)
-	if err != nil {
-		gwlog.Panic(err)
-	}
-
-	p.AppendVarBytes(dataBytes)
-}
-
-// ReadData reads one data of any type from the beginning of unread payload
-func (p *Packet) ReadData(msg interface{}) {
-	b := p.ReadVarBytes()
-	//gwlog.Infof("ReadData: %s", string(b))
-	err := MSG_PACKER.UnpackMsg(b, msg)
-	if err != nil {
-		gwlog.Panic(err)
-	}
-}
-
-// AppendArgs appends arguments to the end of payload one by one
-func (p *Packet) AppendArgs(args []interface{}) {
-	argCount := uint16(len(args))
-	p.AppendUint16(argCount)
-
-	for _, arg := range args {
-		p.AppendData(arg)
-	}
-}
-
 // ReadArgs reads a number of arguments from the beginning of unread payload
 func (p *Packet) ReadArgs() [][]byte {
 	argCount := p.ReadUint16()
@@ -473,22 +436,6 @@ func (p *Packet) ReadStringList() []string {
 		list[i] = p.ReadVarStr()
 	}
 	return list
-}
-
-func (p *Packet) AppendEntityIDSet(eids common.EntityIDSet) {
-	p.AppendUint32(uint32(len(eids)))
-	for eid := range eids {
-		p.AppendEntityID(eid)
-	}
-}
-
-func (p *Packet) ReadEntityIDSet() common.EntityIDSet {
-	size := p.ReadUint32()
-	eids := make(common.EntityIDSet, size)
-	for i := uint32(0); i < size; i++ {
-		eids.Add(p.ReadEntityID())
-	}
-	return eids
 }
 
 // GetPayloadLen returns the payload length

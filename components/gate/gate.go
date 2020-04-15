@@ -20,14 +20,11 @@ import (
 	"fmt"
 
 	"github.com/dannielwallace/goworld/engine/binutil"
-	"github.com/dannielwallace/goworld/engine/common"
 	"github.com/dannielwallace/goworld/engine/config"
 	"github.com/dannielwallace/goworld/engine/dispatchercluster"
 	"github.com/dannielwallace/goworld/engine/dispatchercluster/dispatcherclient"
 	"github.com/dannielwallace/goworld/engine/gwlog"
-	"github.com/dannielwallace/goworld/engine/netutil"
 	"github.com/dannielwallace/goworld/engine/post"
-	"github.com/dannielwallace/goworld/engine/proto"
 )
 
 var (
@@ -58,8 +55,8 @@ func main() {
 	parseArgs()
 
 	if args.runInDaemonMode {
-		daemoncontext := binutil.Daemonize()
-		defer daemoncontext.Release()
+		daemonCtx := binutil.Daemonize()
+		defer daemonCtx.Release()
 	}
 
 	if args.configFile != "" {
@@ -82,12 +79,11 @@ func main() {
 		logLevel = gateConfig.LogLevel
 	}
 	binutil.SetupGWLog(fmt.Sprintf("gate%d", args.gateid), logLevel, gateConfig.LogFile, gateConfig.LogStderr)
-
-	gateService = gate_impl.NewGateService(args.gateid)
 	binutil.SetupHTTPServer(gateConfig.HTTPAddr, nil)
 
-	dispatchercluster.Initialize(args.gateid, dispatcherclient.GateDispatcherClientType, false, false, &gateDispatcherClientDelegate{})
-	//dispatcherclient.Initialize(&gateDispatcherClientDelegate{}, true)
+	gateService = gate_impl.NewGateService(args.gateid)
+	dispatcherCliInst := gate_impl.NewDispatcherClientDelegate(gateService, signalChan)
+	dispatchercluster.Initialize(args.gateid, dispatcherclient.GateDispatcherClientType, false, false, dispatcherCliInst)
 	setupSignals()
 	gateService.Run() // run gate service in another goroutine
 }
@@ -118,22 +114,4 @@ func setupSignals() {
 			}
 		}
 	}()
-}
-
-type gateDispatcherClientDelegate struct {
-}
-
-func (delegate *gateDispatcherClientDelegate) HandleDispatcherClientPacket(msgtype proto.MsgType, packet *netutil.Packet) {
-	gateService.DispatcherClientPacketQueue <- proto.Message{msgtype, packet}
-}
-
-func (delegate *gateDispatcherClientDelegate) HandleDispatcherClientDisconnect() {
-	//gwlog.Errorf("Disconnected from dispatcher, try reconnecting ...")
-	// if gate is disconnected from dispatcher, we just quit
-	gwlog.Infof("Disconnected from dispatcher, gate has to quit.")
-	signalChan <- syscall.SIGTERM // let gate quit
-}
-
-func (deleget *gateDispatcherClientDelegate) GetEntityIDsForDispatcher(dispid uint16) []common.EntityID {
-	return nil
 }

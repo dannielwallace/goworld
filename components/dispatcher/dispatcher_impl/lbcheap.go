@@ -5,7 +5,6 @@ import (
 
 	"github.com/dannielwallace/goworld/engine/config"
 	"github.com/dannielwallace/goworld/engine/gwlog"
-	"github.com/dannielwallace/goworld/engine/proto"
 )
 
 type lbcheapentry struct {
@@ -15,9 +14,9 @@ type lbcheapentry struct {
 	origCPUPercent float64
 }
 
-func (e *lbcheapentry) update(info proto.GameLBCInfo) {
-	e.origCPUPercent = info.CPUPercent
-	e.CPUPercent = info.CPUPercent
+func (e *lbcheapentry) update(cpuUsageInPercent float64) {
+	e.origCPUPercent = e.CPUPercent
+	e.CPUPercent = cpuUsageInPercent
 }
 
 type lbcheap []*lbcheapentry
@@ -58,16 +57,16 @@ func (h lbcheap) validateHeapIndexes() {
 	gameids := []uint16{}
 	for i := 0; i < len(h); i++ {
 		if h[i].heapidx != i {
-			gwlog.Fatalf("lbcheap elem at index %d but has heapidx=%d", i, h[i].heapidx)
+			gwlog.Fatalf("m_lbcHeap elem at index %d but has heapidx=%d", i, h[i].heapidx)
 		}
 		if i > 0 {
 			if h.Less(i, 0) {
-				gwlog.Fatalf("lbcheap elem at index 0 is not min")
+				gwlog.Fatalf("m_lbcHeap elem at index 0 is not min")
 			}
 		}
 		gameids = append(gameids, h[i].gameid)
 	}
-	//gwlog.Infof("lbcheap: gameids: %v", gameids)
+	//gwlog.Infof("m_lbcHeap: gameids: %v", gameids)
 }
 func (h *lbcheap) chosen(idx int) {
 	entry := (*h)[idx]

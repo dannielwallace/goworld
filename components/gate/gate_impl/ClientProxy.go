@@ -16,24 +16,12 @@ import (
 	"github.com/dannielwallace/goworld/engine/proto"
 )
 
-type clientSyncInfo struct {
-	EntityID common.EntityID
-	X, Y, Z  float32
-	Yaw      float32
-}
-
-func (info *clientSyncInfo) IsEmpty() bool {
-	return info.EntityID == ""
-}
-
 // ClientProxy is a game client connections managed by gate
 type ClientProxy struct {
 	*proto.GoWorldConnection
-	clientid       common.ClientID
-	filterProps    map[string]string
-	clientSyncInfo clientSyncInfo
-	heartbeatTime  time.Time
-	ownerEntityID  common.EntityID // owner entity's ID
+	m_clientId       common.ClientID
+	m_mapFilterProps map[string]string
+	m_heartbeatTime  time.Time
 }
 
 func newClientProxy(_conn net.Conn, cfg *config.GateConfig) *ClientProxy {
@@ -46,22 +34,14 @@ func newClientProxy(_conn net.Conn, cfg *config.GateConfig) *ClientProxy {
 	gwc := proto.NewGoWorldConnection(conn)
 	return &ClientProxy{
 		GoWorldConnection: gwc,
-		clientid:          common.GenClientID(), // each client has its unique clientid
-		filterProps:       map[string]string{},
+		m_clientId:        common.GenClientID(), // each client has its unique m_clientId
+		m_mapFilterProps:  map[string]string{},
 	}
 }
 
 func (cp *ClientProxy) String() string {
-	return fmt.Sprintf("ClientProxy<%s@%s>", cp.clientid, cp.RemoteAddr())
+	return fmt.Sprintf("ClientProxy<%s@%s>", cp.m_clientId, cp.RemoteAddr())
 }
-
-//func (cp *ClientProxy) SendPacket(packet *netutil.Packet) error {
-//	err := cp.GoWorldConnection.SendPacket(packet)
-//	if err != nil {
-//		return err
-//	}
-//	return cp.Flush("ClientProxy")
-//}
 
 func (cp *ClientProxy) serve(gs *GateService) {
 	defer func() {
@@ -70,7 +50,6 @@ func (cp *ClientProxy) serve(gs *GateService) {
 		post.Post(func() {
 			gs.onClientProxyClose(cp)
 		})
-
 		if err := recover(); err != nil && !netutil.IsConnectionError(err.(error)) {
 			gwlog.TraceError("%s error: %s", cp, err.(error))
 		} else {
@@ -82,10 +61,15 @@ func (cp *ClientProxy) serve(gs *GateService) {
 	//cp.SendSetClientClientID(cp.cp) // set the cp on the client side
 
 	for {
+		if cp.IsTry2Close() {
+			cp.Flush("try 2 close")
+			break
+		}
+
 		var msgtype proto.MsgType
 		pkt, err := cp.Recv(&msgtype)
 		if pkt != nil {
-			gs.clientPacketQueue <- clientProxyMessage{cp, proto.Message{msgtype, pkt}}
+			gs.AddClientPacket(cp, msgtype, pkt)
 		} else if err != nil && !gwioutil.IsTimeoutError(err) {
 			if netutil.IsConnectionError(err) {
 				break

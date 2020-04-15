@@ -4,24 +4,17 @@ import (
 	"fmt"
 	"time"
 
-	"io/ioutil"
-
 	"github.com/dannielwallace/goworld/engine/async"
 	"github.com/dannielwallace/goworld/engine/binutil"
 	"github.com/dannielwallace/goworld/engine/common"
 	"github.com/dannielwallace/goworld/engine/config"
 	"github.com/dannielwallace/goworld/engine/consts"
-	"github.com/dannielwallace/goworld/engine/dispatchercluster"
-	"github.com/dannielwallace/goworld/engine/entity"
 	"github.com/dannielwallace/goworld/engine/gwlog"
 	"github.com/dannielwallace/goworld/engine/gwutils"
 	"github.com/dannielwallace/goworld/engine/gwvar"
-	"github.com/dannielwallace/goworld/engine/kvdb"
-	"github.com/dannielwallace/goworld/engine/kvreg"
 	"github.com/dannielwallace/goworld/engine/netutil"
 	"github.com/dannielwallace/goworld/engine/post"
 	"github.com/dannielwallace/goworld/engine/proto"
-	"github.com/dannielwallace/goworld/engine/service"
 	"github.com/xiaonanln/go-xnsyncutil/xnsyncutil"
 	"github.com/xiaonanln/goTimer"
 )
@@ -31,8 +24,6 @@ const (
 	RsRunning
 	RsTerminating
 	RsTerminated
-	RsFreezing
-	RsFreezed
 )
 
 type GameService struct {
@@ -90,19 +81,6 @@ func (gs *GameService) serveRoutine() {
 		case item := <-gs.PacketQueue:
 			msgtype, pkt := item.MsgType, item.Packet
 			switch msgtype {
-			case proto.MT_SYNC_POSITION_YAW_FROM_CLIENT:
-				gs.HandleSyncPositionYawFromClient(pkt)
-			case proto.MT_CALL_ENTITY_METHOD_FROM_CLIENT:
-				eid := pkt.ReadEntityID()
-				method := pkt.ReadVarStr()
-				args := pkt.ReadArgs()
-				clientid := pkt.ReadClientID()
-				gs.HandleCallEntityMethod(eid, method, args, clientid)
-			case proto.MT_CALL_ENTITY_METHOD:
-				eid := pkt.ReadEntityID()
-				method := pkt.ReadVarStr()
-				args := pkt.ReadArgs()
-				gs.HandleCallEntityMethod(eid, method, args, "")
 			case proto.MT_QUERY_SPACE_GAMEID_FOR_MIGRATE_ACK:
 				gs.HandleQuerySpaceGameIDForMigrateAck(pkt)
 			case proto.MT_MIGRATE_REQUEST_ACK:
@@ -111,38 +89,13 @@ func (gs *GameService) serveRoutine() {
 				gs.HandleRealMigrate(pkt)
 			case proto.MT_NOTIFY_CLIENT_CONNECTED:
 				clientid := pkt.ReadClientID()
-				eid := pkt.ReadEntityID()
-				gid := pkt.ReadUint16()
-				gs.HandleNotifyClientConnected(clientid, eid, gid)
+				gs.HandleNotifyClientConnected(clientid)
 			case proto.MT_NOTIFY_CLIENT_DISCONNECTED:
-				eid := pkt.ReadEntityID()
 				clientid := pkt.ReadClientID()
-				gs.HandleNotifyClientDisconnected(eid, clientid)
-			case proto.MT_LOAD_ENTITY_SOMEWHERE:
-				_ = pkt.ReadUint16()
-				eid := pkt.ReadEntityID()
-				typeName := pkt.ReadVarStr()
-				gs.HandleLoadEntitySomewhere(typeName, eid)
-			case proto.MT_CREATE_ENTITY_SOMEWHERE:
-				_ = pkt.ReadUint16() // gameid
-				entityid := pkt.ReadEntityID()
-				typeName := pkt.ReadVarStr()
-				var data map[string]interface{}
-				pkt.ReadData(&data)
-				gs.HandleCreateEntitySomewhere(entityid, typeName, data)
-			case proto.MT_CALL_NIL_SPACES:
-				_ = pkt.ReadUint16() // ignore except gameid
-				method := pkt.ReadVarStr()
-				args := pkt.ReadArgs()
-				gs.HandleCallNilSpaces(method, args)
-			case proto.MT_KVREG_REGISTER:
-				gs.HandleKvregRegister(pkt)
+				gs.HandleNotifyClientDisconnected(clientid)
 			case proto.MT_NOTIFY_GATE_DISCONNECTED:
 				gateid := pkt.ReadUint16()
 				gs.HandleGateDisconnected(gateid)
-			case proto.MT_START_FREEZE_GAME_ACK:
-				dispid := pkt.ReadUint16()
-				gs.HandleStartFreezeGameAck(dispid)
 			case proto.MT_NOTIFY_GAME_CONNECTED:
 				gs.handleNotifyGameConnected(pkt)
 			case proto.MT_NOTIFY_GAME_DISCONNECTED:
@@ -162,9 +115,6 @@ func (gs *GameService) serveRoutine() {
 			if runState == RsTerminating {
 				// game is terminating, run the terminating process
 				gs.doTerminate()
-			} else if runState == RsFreezing {
-				//game is freezing, run freeze process
-				gs.doFreeze()
 			}
 
 			timer.Tick()
@@ -179,7 +129,7 @@ func (gs *GameService) serveRoutine() {
 			now := time.Now()
 			if !gs.nextCollectEntitySyncInfosTime.After(now) {
 				gs.nextCollectEntitySyncInfosTime = now.Add(gs.positionSyncInterval)
-				entity.CollectEntitySyncInfos()
+				//entity.CollectEntitySyncInfos()
 			}
 		}
 	}
@@ -200,65 +150,10 @@ func (gs *GameService) doTerminate() {
 		gs.waitPostsComplete()
 	}
 
-	// destroy all entities
-	gwlog.Infof("Destroying all entities ...")
-	entity.OnGameTerminating()
+	// TODO, call lua function
 	gwlog.Infof("All entities saved & destroyed, game service terminated.")
 	gs.RunState.Store(RsTerminated)
 
-	for {
-		time.Sleep(time.Second)
-	}
-}
-
-var freezePacker = netutil.MessagePackMsgPacker{}
-
-func (gs *GameService) doFreeze() {
-	// wait for all posts to complete
-	st := time.Now()
-	gs.waitPostsComplete()
-
-	// wait for all async to clear
-	for async.WaitClear() { // wait for all async to stop
-		gs.waitPostsComplete()
-	}
-	gwlog.Infof("wait async & posts clear takes %s", time.Now().Sub(st))
-
-	// destroy all entities
-	freeze := func() error {
-		st = time.Now()
-		freezeEntity, err := entity.Freeze(gs.id)
-		if err != nil {
-			return err
-		}
-		gwlog.Infof("freeze entities takes %s", time.Now().Sub(st))
-		st = time.Now()
-		freezeData, err := freezePacker.PackMsg(freezeEntity, nil)
-		if err != nil {
-			return err
-		}
-		gwlog.Infof("pack entities takes %s, total data size: %d", time.Now().Sub(st), len(freezeData))
-		st = time.Now()
-		freezeFilename := freezeFilename(gs.id)
-		err = ioutil.WriteFile(freezeFilename, freezeData, 0644)
-		if err != nil {
-			return err
-		}
-		gwlog.Infof("write freeze data to file takes %s", time.Now().Sub(st))
-
-		return nil
-	}
-
-	err := freeze()
-	if err != nil {
-		gwlog.Errorf("Game freeze failed: %s, server has to quit", err)
-		kvdb.Initialize() // restore kvdb module
-		gs.RunState.Store(RsRunning)
-		return
-	}
-
-	gwlog.Infof("All entities saved & freezed, game service terminated.")
-	gs.RunState.Store(RsFreezed)
 	for {
 		time.Sleep(time.Second)
 	}
@@ -268,44 +163,9 @@ func (gs *GameService) String() string {
 	return fmt.Sprintf("GameService<%d>", gs.id)
 }
 
-func (gs *GameService) HandleCreateEntitySomewhere(entityid common.EntityID, typeName string, data map[string]interface{}) {
-	if consts.DEBUG_PACKETS {
-		gwlog.Debugf("%s.handleCreateEntityAnywhere: %s, typeName=%s, data=%v", gs, entityid, typeName, data)
-	}
-	entity.OnCreateEntitySomewhere(entityid, typeName, data)
-}
-
-func (gs *GameService) HandleLoadEntitySomewhere(typeName string, entityID common.EntityID) {
-	if consts.DEBUG_PACKETS {
-		gwlog.Debugf("%s.handleLoadEntityAnywhere: typeName=%s, entityID=%s", gs, typeName, entityID)
-	}
-	entity.OnLoadEntitySomewhere(typeName, entityID)
-}
-
-func (gs *GameService) HandleKvregRegister(pkt *netutil.Packet) {
-	// tell the entity that it is registered successfully
-	srvid := pkt.ReadVarStr()
-	srvinfo := pkt.ReadVarStr()
-	force := pkt.ReadBool() // force is not useful here
-	gwlog.Infof("%s kvreg register: %s => %s, force %v", gs, srvid, srvinfo, force)
-
-	kvreg.WatchKvregRegister(srvid, srvinfo)
-}
-
 func (gs *GameService) HandleGateDisconnected(gateid uint16) {
-	entity.OnGateDisconnected(gateid)
-}
-
-func (gs *GameService) HandleStartFreezeGameAck(dispid uint16) {
-	gwlog.Infof("Start freeze game ACK of dispatcher %d is received, checking ...", dispid)
-	gs.dispatcherStartFreezeAcks[dispid-1] = true
-	for _, acked := range gs.dispatcherStartFreezeAcks {
-		if !acked {
-			return
-		}
-	}
-	// all acks are received, enter freezing state ...
-	gs.RunState.Store(RsFreezing)
+	// TODO, on gate disconnect
+	//entity.OnGateDisconnected(gateid)
 }
 
 func (gs *GameService) handleNotifyGameConnected(pkt *netutil.Packet) {
@@ -338,7 +198,8 @@ func (gs *GameService) handleNotifyDeploymentReady(pkt *netutil.Packet) {
 }
 
 func (gs *GameService) handleSetGameIDAck(pkt *netutil.Packet) {
-	dispid := pkt.ReadUint16() // dispatcher  that sent the SET_GAME_ID_ACK
+	_ = pkt.ReadUint16()
+	//dispid := pkt.ReadUint16() // dispatcher  that sent the SET_GAME_ID_ACK
 	isDeploymentReady := pkt.ReadBool()
 
 	gameNum := int(pkt.ReadUint16())
@@ -348,27 +209,8 @@ func (gs *GameService) handleSetGameIDAck(pkt *netutil.Packet) {
 		gs.OnlineGames.Add(gameid)
 	}
 
-	rejectEntitiesNum := pkt.ReadUint32()
-	rejectEntities := make([]common.EntityID, 0, rejectEntitiesNum)
-	for i := uint32(0); i < rejectEntitiesNum; i++ {
-		rejectEntities = append(rejectEntities, pkt.ReadEntityID())
-	}
-	// remove all rejected entities
-	for _, eid := range rejectEntities {
-		e := entity.GetEntity(eid)
-		if e != nil {
-			e.Destroy()
-		}
-	}
-
-	kvregMap := pkt.ReadMapStringString()
-	kvreg.ClearByDispatcher(dispid)
-	for srvid, srvinfo := range kvregMap {
-		kvreg.WatchKvregRegister(srvid, srvinfo)
-	}
-
-	gwlog.Infof("%s: set game ID ack received, deployment ready: %v, %d online games, reject entities: %d, kvreg map: %+v",
-		gs, isDeploymentReady, len(gs.OnlineGames), rejectEntitiesNum, kvregMap)
+	gwlog.Infof("%s: set game ID ack received, deployment ready: %v, %d online games",
+		gs, isDeploymentReady, len(gs.OnlineGames))
 	if isDeploymentReady {
 		// all games are connected
 		gs.onDeploymentReady()
@@ -384,91 +226,53 @@ func (gs *GameService) onDeploymentReady() {
 	gs.isDeploymentReady = true
 	gwvar.IsDeploymentReady.Set(true)
 	gwlog.Infof("DEPLOYMENT IS READY!")
-	entity.OnGameReady()
-	service.OnDeploymentReady()
 }
 
-func (gs *GameService) HandleSyncPositionYawFromClient(pkt *netutil.Packet) {
-	//gwlog.Infof("handleSyncPositionYawFromClient: payload %d", len(pkt.UnreadPayload()))
-	payload := pkt.UnreadPayload()
-	payloadLen := len(payload)
-	for i := 0; i < payloadLen; i += proto.SYNC_INFO_SIZE_PER_ENTITY + common.ENTITYID_LENGTH {
-		eid := common.EntityID(payload[i : i+common.ENTITYID_LENGTH])
-		x := netutil.UnpackFloat32(netutil.NETWORK_ENDIAN, payload[i+common.ENTITYID_LENGTH:i+common.ENTITYID_LENGTH+4])
-		y := netutil.UnpackFloat32(netutil.NETWORK_ENDIAN, payload[i+common.ENTITYID_LENGTH+4:i+common.ENTITYID_LENGTH+8])
-		z := netutil.UnpackFloat32(netutil.NETWORK_ENDIAN, payload[i+common.ENTITYID_LENGTH+8:i+common.ENTITYID_LENGTH+12])
-		yaw := netutil.UnpackFloat32(netutil.NETWORK_ENDIAN, payload[i+common.ENTITYID_LENGTH+12:i+common.ENTITYID_LENGTH+16])
-		entity.OnSyncPositionYawFromClient(eid, entity.Coord(x), entity.Coord(y), entity.Coord(z), entity.Yaw(yaw))
-	}
+func (gs *GameService) HandleNotifyClientConnected(clientid common.ClientID) {
+	// find the owner of the client, and notify new client
+	//client := entity.MakeGameClient(clientid, gateid)
+	//if consts.DEBUG_PACKETS {
+	//	gwlog.Debugf("%s.handleNotifyClientConnected: %s", gs, client)
+	//}
+
+	// TODO, call lua function
 }
 
-func (gs *GameService) HandleCallEntityMethod(entityID common.EntityID, method string, args [][]byte, clientid common.ClientID) {
-	if consts.DEBUG_PACKETS {
-		gwlog.Debugf("%s.handleCallEntityMethod: %s.%s(%v)", gs, entityID, method, args)
-	}
-	entity.OnCall(entityID, method, args, clientid)
-}
-
-func (gs *GameService) HandleNotifyClientConnected(clientid common.ClientID, bootEid common.EntityID, gateid uint16) {
-	client := entity.MakeGameClient(clientid, gateid)
-	if consts.DEBUG_PACKETS {
-		gwlog.Debugf("%s.handleNotifyClientConnected: %s", gs, client)
-	}
-
-	// create a boot entity for the new client and set the client as the OWN CLIENT of the entity
-	e := entity.CreateEntityLocallyWithID(gs.config.BootEntity, nil, bootEid)
-	e.SetClient(client)
-}
-
-func (gs *GameService) HandleCallNilSpaces(method string, args [][]byte) {
-	gwlog.Infof("%s.HandleCallNilSpaces: method=%s, argcount=%d", gs, method, len(args))
-	if consts.DEBUG_PACKETS {
-		gwlog.Debugf("%s.HandleCallNilSpaces: method=%s, argcount=%d", gs, method, len(args))
-	}
-
-	entity.OnCallNilSpaces(method, args)
-}
-
-func (gs *GameService) HandleNotifyClientDisconnected(ownerID common.EntityID, clientid common.ClientID) {
+func (gs *GameService) HandleNotifyClientDisconnected(clientId common.ClientID) {
 	if consts.DEBUG_CLIENTS {
-		gwlog.Debugf("%s.handleNotifyClientDisconnected: %s.%s", gs, ownerID, clientid)
+		gwlog.Debugf("%s.handleNotifyClientDisconnected: %s", gs, clientId)
 	}
 	// find the owner of the client, and notify lose client
-	entity.OnClientDisconnected(ownerID, clientid)
+	// TODO, call lua function
 }
 
 func (gs *GameService) HandleQuerySpaceGameIDForMigrateAck(pkt *netutil.Packet) {
-	spaceid := pkt.ReadEntityID()
-	entityid := pkt.ReadEntityID()
-	gameid := pkt.ReadUint16()
-	entity.OnQuerySpaceGameIDForMigrateAck(entityid, spaceid, gameid)
+	//spaceid := pkt.ReadEntityID()
+	//entityid := pkt.ReadEntityID()
+	//gameid := pkt.ReadUint16()
+	//entity.OnQuerySpaceGameIDForMigrateAck(entityid, spaceid, gameid)
 }
 
 func (gs *GameService) HandleMigrateRequestAck(pkt *netutil.Packet) {
-	eid := pkt.ReadEntityID()
-	spaceid := pkt.ReadEntityID()
-	spaceLoc := pkt.ReadUint16()
+	//eid := pkt.ReadEntityID()
+	//spaceid := pkt.ReadEntityID()
+	//spaceLoc := pkt.ReadUint16()
 
-	if consts.DEBUG_PACKETS {
-		gwlog.Debugf("Entity %s is migrating to space %s at game %d", eid, spaceid, spaceLoc)
-	}
+	//if consts.DEBUG_PACKETS {
+	//	gwlog.Debugf("Entity %s is migrating to space %s at game %d", eid, spaceid, spaceLoc)
+	//}
 
-	entity.OnMigrateRequestAck(eid, spaceid, spaceLoc)
+	//entity.OnMigrateRequestAck(eid, spaceid, spaceLoc)
 }
 
 func (gs *GameService) HandleRealMigrate(pkt *netutil.Packet) {
-	eid := pkt.ReadEntityID()
-	_ = pkt.ReadUint16() // targetGame is not userful
-	data := pkt.ReadVarBytes()
-	entity.OnRealMigrate(eid, data)
+	//eid := pkt.ReadEntityID()
+	//_ = pkt.ReadUint16() // targetGame is not userful
+	//data := pkt.ReadVarBytes()
+	//entity.OnRealMigrate(eid, data)
 }
 
 func (gs *GameService) Terminate() {
 	gs.RunState.Store(RsTerminating)
 }
 
-func (gs *GameService) StartFreeze() {
-	dispatcherNum := len(config.GetDispatcherIDs())
-	gs.dispatcherStartFreezeAcks = make([]bool, dispatcherNum)
-	dispatchercluster.SendStartFreezeGame()
-}

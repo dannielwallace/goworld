@@ -28,8 +28,8 @@ const (
 	DISPATCHER_CLIENT_PROXY_READ_BUFFER_SIZE = 1024 * 1024
 	// GAME_PENDING_PACKET_QUEUE_MAX_LEN is the maxium number of packets in pending queue when game is blocked
 	GAME_PENDING_PACKET_QUEUE_MAX_LEN = 1000000
-	// ENTITY_PENDING_PACKET_QUEUE_MAX_LEN is the maxium number of packets in pending queue when entity is blocked
-	ENTITY_PENDING_PACKET_QUEUE_MAX_LEN = 1000
+	// CLIENT_PENDING_PACKET_QUEUE_MAX_LEN is the maxium number of packets in pending queue when entity is blocked
+	CLIENT_PENDING_PACKET_QUEUE_MAX_LEN = 1000
 
 	DISPATCHER_SERVICE_PACKET_QUEUE_SIZE = 10000
 	// DISPATCHER_SERVICE_TICK_INTERVAL is the tick interval for dispatcher service's main routine.

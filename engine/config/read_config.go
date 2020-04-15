@@ -58,18 +58,17 @@ type GameConfig struct {
 
 // GateConfig defines fields of gate config
 type GateConfig struct {
-	ListenAddr             string
-	LogFile                string
-	LogStderr              bool
-	HTTPAddr               string
-	LogLevel               string
-	GoMaxProcs             int
-	CompressConnection     bool
-	EncryptConnection      bool
-	RSAKey                 string
-	RSACertificate         string
-	HeartbeatCheckInterval int
-	PositionSyncIntervalMS int
+	ListenAddr         string
+	LogFile            string
+	LogStderr          bool
+	HTTPAddr           string
+	LogLevel           string
+	GoMaxProcs         int
+	CompressConnection bool
+	EncryptConnection  bool
+	RSAKey             string
+	RSACertificate     string
+	ClientConnTTL      int
 }
 
 // DispatcherConfig defines fields of dispatcher config
@@ -376,8 +375,7 @@ func readGateCommonConfig(section *ini.Section, gcc *GateConfig) {
 	gcc.GoMaxProcs = 0
 	gcc.RSAKey = "rsa.key"
 	gcc.RSACertificate = "rsa.crt"
-	gcc.HeartbeatCheckInterval = 0
-	gcc.PositionSyncIntervalMS = 100
+	gcc.ClientConnTTL = 0
 
 	_readGateConfig(section, gcc)
 }
@@ -418,10 +416,8 @@ func _readGateConfig(sec *ini.Section, sc *GateConfig) {
 			sc.RSAKey = key.MustString(sc.RSAKey)
 		} else if name == "rsa_certificate" {
 			sc.RSACertificate = key.MustString(sc.RSACertificate)
-		} else if name == "heartbeat_check_interval" {
-			sc.HeartbeatCheckInterval = key.MustInt(sc.HeartbeatCheckInterval)
-		} else if name == "position_sync_interval_ms" {
-			sc.PositionSyncIntervalMS = key.MustInt(sc.PositionSyncIntervalMS)
+		} else if name == "client_conn_ttl" {
+			sc.ClientConnTTL = key.MustInt(sc.ClientConnTTL)
 		} else {
 			gwlog.Fatalf("section %s has unknown key: %s", sec.Name(), key.Name())
 		}
