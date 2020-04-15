@@ -25,20 +25,20 @@ import (
 )
 
 type clientDispatchInfo struct {
-	m_gateId				uint16
-	m_gameId				uint16
-	m_blockUntilTime		time.Time
-	m_pendingPacketQueue	[]*netutil.Packet
-	m_dispatcherSrv			*DispatcherService
+	m_gateId             uint16
+	m_gameId             uint16
+	m_blockUntilTime     time.Time
+	m_pendingPacketQueue []*netutil.Packet
+	m_dispatcherSrv      *DispatcherService
 }
 
 func NewClientDispatchInfo(dispatcherSrv *DispatcherService, gateId uint16, gameId uint16) *clientDispatchInfo {
 	return &clientDispatchInfo{
-		m_gateId:				gateId,
-		m_gameId:				gameId,
-		m_blockUntilTime:		time.Time{},
-		m_pendingPacketQueue:	[]*netutil.Packet{},
-		m_dispatcherSrv:		dispatcherSrv,
+		m_gateId:             gateId,
+		m_gameId:             gameId,
+		m_blockUntilTime:     time.Time{},
+		m_pendingPacketQueue: []*netutil.Packet{},
+		m_dispatcherSrv:      dispatcherSrv,
 	}
 }
 
@@ -91,21 +91,21 @@ func (cdi *clientDispatchInfo) unblock() {
 }
 
 type gameDispatchInfo struct {
-	gameid				uint16
-	clientProxy			*dispatcherClientProxy
-	isBlocked			bool
-	blockUntilTime		time.Time // game can be blocked
-	pendingPacketQueue	[]*netutil.Packet
-	isBanBootEntity		bool
-	lbcheapentry		*lbcheapentry
-	m_dispatcherSrv		*DispatcherService
+	gameid             uint16
+	clientProxy        *dispatcherClientProxy
+	isBlocked          bool
+	blockUntilTime     time.Time // game can be blocked
+	pendingPacketQueue []*netutil.Packet
+	isBanBootEntity    bool
+	lbcheapentry       *lbcheapentry
+	m_dispatcherSrv    *DispatcherService
 }
 
 func NewGameDispatcherInfo(gameId uint16, isBanBootEntity bool, lbcheapentry *lbcheapentry, dispatcherSrv *DispatcherService) *gameDispatchInfo {
 	return &gameDispatchInfo{
-		gameid: gameId,
+		gameid:          gameId,
 		isBanBootEntity: isBanBootEntity,
-		lbcheapentry: lbcheapentry,
+		lbcheapentry:    lbcheapentry,
 		m_dispatcherSrv: dispatcherSrv,
 	}
 }
@@ -151,7 +151,7 @@ func (gdi *gameDispatchInfo) dispatchPacket(pkt *netutil.Packet) error {
 			gdi.pendingPacketQueue = append(gdi.pendingPacketQueue, pkt)
 			pkt.AddRefCount(1)
 
-			if len(gdi.pendingPacketQueue) % 1 == 0 {
+			if len(gdi.pendingPacketQueue)%1 == 0 {
 				gwlog.Warnf("game %d pending packet count = %d, blocked = %v, clientProxy = %s", gdi.gameid, len(gdi.pendingPacketQueue), gdi.isBlocked, gdi.clientProxy)
 			}
 			return nil
@@ -196,7 +196,7 @@ type dispatcherMessage struct {
 
 // DispatcherService implements the dispatcher service
 type DispatcherService struct {
-	m_dispId          uint16
+	m_dispId           uint16
 	m_config           *config.DispatcherConfig
 	m_clients          map[common.ClientID]*clientDispatchInfo
 	m_games            map[uint16]*gameDispatchInfo
@@ -484,7 +484,7 @@ func (ds *DispatcherService) chooseIdleGame() *gameDispatchInfo {
 // Choose a dispatcher client for sending Anywhere packets
 func (ds *DispatcherService) pollBootGameId() uint16 {
 	if len(ds.m_bootGames) > 0 {
-		gameid := ds.m_bootGames[ds.m_chooseGameIdx % len(ds.m_bootGames)]
+		gameid := ds.m_bootGames[ds.m_chooseGameIdx%len(ds.m_bootGames)]
 		ds.m_chooseGameIdx += 1
 		return gameid
 	} else {

@@ -27,28 +27,28 @@ const (
 )
 
 type GameService struct {
-	config *config.GameConfig
-	id     uint16
+	m_config *config.GameConfig
+	m_gameId uint16
 	//registeredServices map[string]common.EntityIDSet
 
-	PacketQueue                    chan proto.Message
-	RunState                       xnsyncutil.AtomicInt
-	nextCollectEntitySyncInfosTime time.Time
-	dispatcherStartFreezeAcks      []bool
-	positionSyncInterval           time.Duration
-	ticker                         <-chan time.Time
-	OnlineGames                    common.Uint16Set
-	isDeploymentReady              bool
+	m_packetQueue chan proto.Message
+	m_runState    xnsyncutil.AtomicInt
+
+	m_nextSyncInfosTime time.Time
+	m_syncInfosInterval time.Duration
+	m_GameLoopTicker    <-chan time.Time
+
+	m_onlineGames     common.Uint16Set
+	isDeploymentReady bool
 }
 
 func NewGameService(gameid uint16) *GameService {
-	//cfg := config.GetGame(gameid)
+	//cfg := m_config.GetGame(gameid)
 	return &GameService{
-		id: gameid,
-		//registeredServices: map[string]common.EntityIDSet{},
-		PacketQueue: make(chan proto.Message, consts.GAME_SERVICE_PACKET_QUEUE_SIZE),
-		ticker:      time.Tick(consts.GAME_SERVICE_TICK_INTERVAL),
-		OnlineGames: common.Uint16Set{},
+		m_gameId:         gameid,
+		m_packetQueue:    make(chan proto.Message, consts.GAME_SERVICE_PACKET_QUEUE_SIZE),
+		m_GameLoopTicker: time.Tick(consts.GAME_SERVICE_TICK_INTERVAL),
+		m_onlineGames:    common.Uint16Set{},
 		//terminated:         xnsyncutil.NewOneTimeCond(),
 		//dumpNotify:         xnsyncutil.NewOneTimeCond(),
 		//dumpFinishedNotify: xnsyncutil.NewOneTimeCond(),
@@ -58,27 +58,42 @@ func NewGameService(gameid uint16) *GameService {
 }
 
 func (gs *GameService) Run() {
-	gs.RunState.Store(RsRunning)
+	gs.m_runState.Store(RsRunning)
 	binutil.PrintSupervisorTag(consts.GAME_STARTED_TAG)
 	gwutils.RepeatUntilPanicless(gs.serveRoutine)
 }
 
+func (gs *GameService) GetRunState() int {
+	return gs.m_runState.Load()
+}
+
+func (gs *GameService) GetOnlineGames() common.Uint16Set {
+	return gs.m_onlineGames
+}
+
+func (gs *GameService) AddMsgPacket(msgType proto.MsgType, packet *netutil.Packet) {
+	gs.m_packetQueue <- proto.Message{ // may block the dispatcher client routine
+		MsgType: msgType,
+		Packet:  packet,
+	}
+}
+
 func (gs *GameService) serveRoutine() {
-	cfg := config.GetGame(gs.id)
-	gs.config = cfg
-	gs.positionSyncInterval = time.Millisecond * time.Duration(cfg.PositionSyncIntervalMS)
-	if gs.positionSyncInterval < consts.GAME_SERVICE_TICK_INTERVAL {
-		gwlog.Warnf("%s: entity position sync interval is too small: %s, so reset to %s", gs, gs.positionSyncInterval, consts.GAME_SERVICE_TICK_INTERVAL)
-		gs.positionSyncInterval = consts.GAME_SERVICE_TICK_INTERVAL
+	cfg := config.GetGame(gs.m_gameId)
+	gs.m_config = cfg
+	gs.m_syncInfosInterval = time.Millisecond * time.Duration(cfg.PositionSyncIntervalMS)
+	if gs.m_syncInfosInterval < consts.GAME_SERVICE_TICK_INTERVAL {
+		gwlog.Warnf("%s: entity position sync interval is too small: %s, so reset to %s", gs, gs.m_syncInfosInterval, consts.GAME_SERVICE_TICK_INTERVAL)
+		gs.m_syncInfosInterval = consts.GAME_SERVICE_TICK_INTERVAL
 	}
 
-	gwlog.Infof("Read game %d config: \n%s\n", gs.id, config.DumpPretty(cfg))
+	gwlog.Infof("Read game %d m_config: \n%s\n", gs.m_gameId, config.DumpPretty(cfg))
 
 	// here begins the main loop of Game
 	for {
 		isTick := false
 		select {
-		case item := <-gs.PacketQueue:
+		case item := <-gs.m_packetQueue:
 			msgtype, pkt := item.MsgType, item.Packet
 			switch msgtype {
 			case proto.MT_QUERY_SPACE_GAMEID_FOR_MIGRATE_ACK:
@@ -109,9 +124,9 @@ func (gs *GameService) serveRoutine() {
 			}
 
 			pkt.Release()
-		case <-gs.ticker:
+		case <-gs.m_GameLoopTicker:
 			isTick = true
-			runState := gs.RunState.Load()
+			runState := gs.m_runState.Load()
 			if runState == RsTerminating {
 				// game is terminating, run the terminating process
 				gs.doTerminate()
@@ -127,8 +142,8 @@ func (gs *GameService) serveRoutine() {
 		post.Tick()
 		if isTick {
 			now := time.Now()
-			if !gs.nextCollectEntitySyncInfosTime.After(now) {
-				gs.nextCollectEntitySyncInfosTime = now.Add(gs.positionSyncInterval)
+			if !gs.m_nextSyncInfosTime.After(now) {
+				gs.m_nextSyncInfosTime = now.Add(gs.m_syncInfosInterval)
 				//entity.CollectEntitySyncInfos()
 			}
 		}
@@ -152,7 +167,7 @@ func (gs *GameService) doTerminate() {
 
 	// TODO, call lua function
 	gwlog.Infof("All entities saved & destroyed, game service terminated.")
-	gs.RunState.Store(RsTerminated)
+	gs.m_runState.Store(RsTerminated)
 
 	for {
 		time.Sleep(time.Second)
@@ -160,7 +175,7 @@ func (gs *GameService) doTerminate() {
 }
 
 func (gs *GameService) String() string {
-	return fmt.Sprintf("GameService<%d>", gs.id)
+	return fmt.Sprintf("GameService<%d>", gs.m_gameId)
 }
 
 func (gs *GameService) HandleGateDisconnected(gateid uint16) {
@@ -170,27 +185,27 @@ func (gs *GameService) HandleGateDisconnected(gateid uint16) {
 
 func (gs *GameService) handleNotifyGameConnected(pkt *netutil.Packet) {
 	gameid := pkt.ReadUint16() // the new connected game
-	if gs.OnlineGames.Contains(gameid) {
+	if gs.m_onlineGames.Contains(gameid) {
 		// should not happen
 		gwlog.Errorf("%s: handle notify game connected: game%d is connected, but it was already connected", gs, gameid)
 		return
 	}
 
-	gs.OnlineGames.Add(gameid)
-	gwlog.Infof("%s notify game connected: %d online games currently", gs, len(gs.OnlineGames))
+	gs.m_onlineGames.Add(gameid)
+	gwlog.Infof("%s notify game connected: %d online games currently", gs, len(gs.m_onlineGames))
 }
 
 func (gs *GameService) handleNotifyGameDisconnected(pkt *netutil.Packet) {
 	gameid := pkt.ReadUint16()
 
-	if !gs.OnlineGames.Contains(gameid) {
+	if !gs.m_onlineGames.Contains(gameid) {
 		// should not happen
 		gwlog.Errorf("%s: handle notify game disconnected: game%d is disconnected, but it was not connected", gs, gameid)
 		return
 	}
 
-	gs.OnlineGames.Remove(gameid)
-	gwlog.Infof("%s notify game disconnected: %d online games left", gs, len(gs.OnlineGames))
+	gs.m_onlineGames.Remove(gameid)
+	gwlog.Infof("%s notify game disconnected: %d online games left", gs, len(gs.m_onlineGames))
 }
 
 func (gs *GameService) handleNotifyDeploymentReady(pkt *netutil.Packet) {
@@ -203,14 +218,14 @@ func (gs *GameService) handleSetGameIDAck(pkt *netutil.Packet) {
 	isDeploymentReady := pkt.ReadBool()
 
 	gameNum := int(pkt.ReadUint16())
-	gs.OnlineGames = common.Uint16Set{} // clear online games first
+	gs.m_onlineGames = common.Uint16Set{} // clear online games first
 	for i := 0; i < gameNum; i++ {
 		gameid := pkt.ReadUint16()
-		gs.OnlineGames.Add(gameid)
+		gs.m_onlineGames.Add(gameid)
 	}
 
 	gwlog.Infof("%s: set game ID ack received, deployment ready: %v, %d online games",
-		gs, isDeploymentReady, len(gs.OnlineGames))
+		gs, isDeploymentReady, len(gs.m_onlineGames))
 	if isDeploymentReady {
 		// all games are connected
 		gs.onDeploymentReady()
@@ -273,6 +288,5 @@ func (gs *GameService) HandleRealMigrate(pkt *netutil.Packet) {
 }
 
 func (gs *GameService) Terminate() {
-	gs.RunState.Store(RsTerminating)
+	gs.m_runState.Store(RsTerminating)
 }
-

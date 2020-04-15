@@ -1,9 +1,9 @@
 package gwmongo
 
 import (
-	"github.com/pkg/errors"
 	"github.com/dannielwallace/goworld/engine/async"
 	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/pkg/errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )

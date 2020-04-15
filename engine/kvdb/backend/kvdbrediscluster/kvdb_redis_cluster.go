@@ -6,8 +6,8 @@ import (
 	"time"
 
 	redis "github.com/chasex/redis-go-cluster"
-	"github.com/pkg/errors"
 	"github.com/dannielwallace/goworld/engine/kvdb/types"
+	"github.com/pkg/errors"
 )
 
 const (

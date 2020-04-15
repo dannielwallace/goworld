@@ -15,7 +15,7 @@ type Message struct {
 // 0 ~ 999, client 2 gs directly, not care the content
 const (
 	MT_REDIRECT_TO_GS_START = 1 + iota
-	MT_REDIRECT_TO_GS_END = 999
+	MT_REDIRECT_TO_GS_END   = 999
 )
 
 const (

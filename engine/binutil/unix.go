@@ -5,8 +5,8 @@ package binutil
 import (
 	"os"
 
-	"github.com/sevlyar/go-daemon"
 	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/sevlyar/go-daemon"
 )
 
 func Daemonize() *daemon.Context {

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/dannielwallace/goworld/engine/config"
 	"github.com/dannielwallace/goworld/engine/consts"
+	"github.com/pkg/errors"
 )
 
 func start(sid ServerID) {

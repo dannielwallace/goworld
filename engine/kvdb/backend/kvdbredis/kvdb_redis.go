@@ -3,9 +3,9 @@ package kvdbredis
 import (
 	"io"
 
+	"github.com/dannielwallace/goworld/engine/kvdb/types"
 	"github.com/garyburd/redigo/redis"
 	"github.com/pkg/errors"
-	"github.com/dannielwallace/goworld/engine/kvdb/types"
 )
 
 const (

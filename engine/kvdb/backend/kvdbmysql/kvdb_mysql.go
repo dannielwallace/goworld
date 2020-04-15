@@ -9,9 +9,9 @@ import (
 
 	"strconv"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/dannielwallace/goworld/engine/gwlog"
 	"github.com/dannielwallace/goworld/engine/kvdb/types"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 const (

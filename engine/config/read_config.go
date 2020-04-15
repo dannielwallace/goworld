@@ -17,10 +17,10 @@ import (
 
 	"path"
 
-	"github.com/go-ini/ini"
-	"github.com/pkg/errors"
 	"github.com/dannielwallace/goworld/engine/common"
 	"github.com/dannielwallace/goworld/engine/gwlog"
+	"github.com/go-ini/ini"
+	"github.com/pkg/errors"
 )
 
 const (

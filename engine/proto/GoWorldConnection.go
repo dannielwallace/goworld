@@ -5,11 +5,11 @@ import (
 
 	"time"
 
-	"github.com/xiaonanln/go-xnsyncutil/xnsyncutil"
 	"github.com/dannielwallace/goworld/engine/common"
 	"github.com/dannielwallace/goworld/engine/consts"
 	"github.com/dannielwallace/goworld/engine/gwlog"
 	"github.com/dannielwallace/goworld/engine/netutil"
+	"github.com/xiaonanln/go-xnsyncutil/xnsyncutil"
 )
 
 // GoWorldConnection is the network protocol implementation of GoWorld components (dispatcher, gate, game)

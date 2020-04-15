@@ -1,4 +1,4 @@
-package game
+package main
 
 import (
 	"flag"
@@ -60,7 +60,7 @@ func parseArgs() {
 // Run runs the game server
 //
 // This is the main game server loop
-func Run() {
+func main() {
 	rand.Seed(time.Now().UnixNano())
 	parseArgs()
 
@@ -137,13 +137,11 @@ func setupSignals() {
 				waitGameServiceStateSatisfied(func(rs int) bool {
 					return rs != game_impl.RsTerminating
 				})
-				if gameService.RunState.Load() != game_impl.RsTerminated {
+				if gameService.GetRunState() != game_impl.RsTerminated {
 					// game service is not terminated successfully, abort
 					gwlog.Errorf("Game service is not terminated successfully, back to running ...")
 					continue
 				}
-
-				waitEntityStorageFinish()
 
 				gwlog.Infof("Game %d shutdown gracefully.", gameid)
 				os.Exit(0)
@@ -157,7 +155,7 @@ func setupSignals() {
 func waitGameServiceStateSatisfied(s func(rs int) bool) {
 	waitCounter := 0
 	for {
-		state := gameService.RunState.Load()
+		state := gameService.GetRunState()
 		if s(state) {
 			break
 		}
@@ -169,23 +167,14 @@ func waitGameServiceStateSatisfied(s func(rs int) bool) {
 	}
 }
 
-func waitEntityStorageFinish() {
-	// wait until entity storage's queue is empty
-	gwlog.Infof("Closing Entity Storage ...")
-	//storage.Shutdown()
-	gwlog.Infof("*** DB OK ***")
-}
-
 type _GameDispatcherClientDelegate struct {
 }
 
 var lastWarnGateServiceQueueLen = 0
 
-func (delegate *_GameDispatcherClientDelegate) HandleDispatcherClientPacket(msgtype proto.MsgType, packet *netutil.Packet) {
-	gameService.PacketQueue <- proto.Message{ // may block the dispatcher client routine
-		MsgType: msgtype,
-		Packet:  packet,
-	}
+func (delegate *_GameDispatcherClientDelegate) HandleDispatcherClientPacket(msgType proto.MsgType, packet *netutil.Packet) {
+	// may block the dispatcher client routine
+	gameService.AddMsgPacket(msgType, packet)
 }
 
 func (delegate *_GameDispatcherClientDelegate) HandleDispatcherClientDisconnect() {
@@ -199,5 +188,5 @@ func GetGameID() uint16 {
 
 // GetOnlineGames returns all online game IDs
 func GetOnlineGames() common.Uint16Set {
-	return gameService.OnlineGames
+	return gameService.GetOnlineGames()
 }

@@ -9,13 +9,13 @@ import (
 )
 
 type dispatcherClientDelegate struct {
-	m_gateSrv *GateService
+	m_gateSrv   *GateService
 	m_singnalCh chan os.Signal
 }
 
 func NewDispatcherClientDelegate(gateSrv *GateService, signalCh chan os.Signal) *dispatcherClientDelegate {
 	return &dispatcherClientDelegate{
-		m_gateSrv: gateSrv,
+		m_gateSrv:   gateSrv,
 		m_singnalCh: signalCh,
 	}
 }

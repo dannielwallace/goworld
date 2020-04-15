@@ -38,19 +38,19 @@ type GateService struct {
 	m_dispatcherPacketQueue chan proto.Message
 	m_clientPacketQueue     chan clientProxyMessage
 
-	m_filterTrees           map[string]*_FilterTree
-	m_nextFlushSyncTime     time.Time
+	m_filterTrees       map[string]*_FilterTree
+	m_nextFlushSyncTime time.Time
 
-	m_tlsConfig     		*tls.Config
-	m_clientConnTTL 		time.Duration
+	m_tlsConfig     *tls.Config
+	m_clientConnTTL time.Duration
 
-	m_terminating           xnsyncutil.AtomicBool
-	Terminated              *xnsyncutil.OneTimeCond
+	m_terminating xnsyncutil.AtomicBool
+	Terminated    *xnsyncutil.OneTimeCond
 }
 
 func NewGateService(gateId uint16) *GateService {
 	return &GateService{
-		m_gateId:					gateId,
+		m_gateId:                gateId,
 		m_clientProxies:         map[common.ClientID]*ClientProxy{},
 		m_dispatcherPacketQueue: make(chan proto.Message, consts.GATE_SERVICE_PACKET_QUEUE_SIZE),
 		m_clientPacketQueue:     make(chan clientProxyMessage, consts.GATE_SERVICE_PACKET_QUEUE_SIZE),
@@ -199,12 +199,13 @@ func (gs *GateService) handleClientProxyPacket(cp *ClientProxy, msgType proto.Ms
 	}
 }
 
-func (gs *GateService) handleClientMsgDirect2GS(cp *ClientProxy, pkt *netutil.Packet)  {
+func (gs *GateService) handleClientMsgDirect2GS(cp *ClientProxy, pkt *netutil.Packet) {
 	pkt.AppendClientID(cp.m_clientId)
 
 	dispId := dispatchercluster.ClientIDToDispatcherID(cp.m_clientId)
 	_ = dispatchercluster.SelectByDispatcherID(dispId - 1).SendPacketRelease(pkt)
 }
+
 // HANDLE CLIENT MSG END
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -305,6 +306,7 @@ func (gs *GateService) handleCallFilteredClientProxies(packet *netutil.Packet) {
 	}
 
 }
+
 // HANDLE CLIENT MSG END
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
