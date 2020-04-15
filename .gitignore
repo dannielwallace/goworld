@@ -1,5 +1,4 @@
 # Binaries for programs and plugins
-*.exe
 *.dll
 *.so
 *.dylib
@@ -19,22 +18,13 @@
 .*.swp
 .*.swo
 
-_entity_storage/
 fc
 *.db/
 .idea/
 examples/*/*.sh
-engine/storage/backend/filesystem/test_entity_storage/
 *.bat
 *.dat
 .idea.bak/
 .vscode/
 tests/
-/components/dispatcher/dispatcher
-/components/gate/gate
-/examples/test_client/test_client
-/examples/test_game/test_game
-/examples/chatroom_demo/chatroom_demo
-/examples/nil_game/nil_game
-/examples/unity_demo/unity_demo
 /go.sum
