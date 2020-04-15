@@ -1,7 +1,7 @@
-.PHONY: dispatcher test_game test_client gate chatroom_demo unity_demo
+.PHONY: dispatcher game test_client gate
 .PHONY: runtestserver killtestserver test covertest install-deps
 
-all: install dispatcher test_game test_client gate chatroom_demo unity_demo
+all: install dispatcher game test_client gate
 
 install:
 	go install ./cmd/...
@@ -13,28 +13,22 @@ gate:
 	cd components/gate && go build
 
 test_game:
-	cd examples/test_game && go build
+	cd components/game && go build
 
 test_client:
 	cd examples/test_client && go build
 
-chatroom_demo:
-	cd examples/chatroom_demo && go build
-
-unity_demo:
-	cd examples/unity_demo && go build
-
-runtestserver: dispatcher gate test_game
+runtestserver: dispatcher gate game
 	components/dispatcher/dispatcher &
-	examples/test_game/test_game -gid=1 -log info &
-	examples/test_game/test_game -gid=2 -log info &
+	components/game/game -gid=1 -log info &
+	components/game/game -gid=2 -log info &
 	components/gate/gate -gid 1 -log debug &
 	components/gate/gate -gid 2 -log debug &
 
 killtestserver:
 	- killall gate
 	- sleep 3
-	- killall test_game
+	- killall game
 	- sleep 5
 	- killall dispatcher
 

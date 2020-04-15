@@ -6,17 +6,6 @@ desired_dispatchers=1
 desired_games=1
 desired_gates=1
 
-[storage]
-type=mongodb
-url=mongodb://127.0.0.1:27017/
-db=goworld
-;type=redis
-;url=redis://127.0.0.1:6379
-;db=0
-;type=redis_cluster
-;start_nodes_1=127.0.0.1:6379
-;start_nodes_2=127.0.0.2:6379
-
 ;type=sql
 ;driver=mysql
 ;url=root:testmysql@tcp(127.0.0.1:3306)/goworld
