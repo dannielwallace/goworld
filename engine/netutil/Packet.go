@@ -348,7 +348,7 @@ func (p *Packet) ReadUint64() (v uint64) {
 // ReadBytes reads bytes from the beginning of unread payload
 func (p *Packet) ReadBytes(size uint32) []byte {
 	pos := p.readCursor + _PREPAYLOAD_SIZE
-	if pos > uint32(len(p.bytes)) || pos+size > uint32(len(p.bytes)) {
+	if pos + size > uint32(len(p.bytes)) {
 		gwlog.Panicf("Packet %p bytes is %d, but reading %d+%d", p, len(p.bytes), pos, size)
 	}
 
@@ -359,12 +359,13 @@ func (p *Packet) ReadBytes(size uint32) []byte {
 
 // PeekLastBytes peek bytes from the end of unread payload
 func (p *Packet) PeekLastBytes(size uint32) []byte {
-	payloadLen := uint32(len(p.bytes))
-	if _PREPAYLOAD_SIZE + size > payloadLen {
+	payloadLen := p.GetPayloadLen()
+	if size > payloadLen {
 		gwlog.Panicf("Packet %p bytes is %d, but peek %d", p, payloadLen, size)
 	}
 
-	bytes := p.bytes[payloadLen - size : ] // bytes are not copied
+	lastPos := _PREPAYLOAD_SIZE + payloadLen
+	bytes := p.bytes[lastPos - size : lastPos] // bytes are not copied
 	return bytes
 }
 

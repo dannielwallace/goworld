@@ -35,7 +35,7 @@ func (ds *DispatcherService) handleSetGateID(dcp *dispatcherClientProxy, pkt *ne
 	}
 
 	dcp.gateid = gateid
-	gwlog.Infof("Gate %d is connected: %s", gateid, dcp)
+	gwlog.Infof("[DispatcherService-handleSetGateID] Gate %d is connected: %s", gateid, dcp)
 
 	olddcp := ds.m_gates[gateid]
 	if olddcp != nil {
@@ -79,6 +79,7 @@ func (ds *DispatcherService) handleNotifyClientDisconnected(dcp *dispatcherClien
 	cdi := ds.m_clients[clientID]
 	if cdi != nil {
 		_ = cdi.dispatchPacket(pkt)
+		delete(ds.m_clients, clientID)
 	} else {
 		gwlog.Errorf("%s: client %s is disconnected, but cdi %s not found", ds, dcp, clientID)
 	}

@@ -1,7 +1,6 @@
 package game_impl
 
 import (
-	"fmt"
 	"github.com/dannielwallace/goworld/engine/common"
 	"github.com/dannielwallace/goworld/engine/consts"
 	"github.com/dannielwallace/goworld/engine/gwlog"
@@ -19,10 +18,11 @@ func (gs *GameService) handleMsgClient2Gs(pkt *netutil.Packet) {
 	clientID := pkt.PeekClientIDFromEnd()
 	payloadLen := pkt.GetPayloadLen()
 
-	fmt.Println("[GameService-handleMsgClient2Gs], client:[%v], msgLen:[%v]", clientID, payloadLen)
+	gwlog.Infof("[GameService-handleMsgClient2Gs], client:[%v], msgLen:[%v]", clientID, payloadLen)
 }
 
 func (gs *GameService) HandleGateDisconnected(gateid uint16) {
+	gwlog.Infof("[GameService-HandleGateDisconnected], gateid:[%v]", gateid)
 	// TODO, on gate disconnect
 	//entity.OnGateDisconnected(gateid)
 }
@@ -36,7 +36,7 @@ func (gs *GameService) handleNotifyGameConnected(pkt *netutil.Packet) {
 	}
 
 	gs.m_onlineGames.Add(gameid)
-	gwlog.Infof("%s notify game connected: %d online games currently", gs, len(gs.m_onlineGames))
+	gwlog.Infof("[GameService-handleNotifyGameConnected]%s notify game connected: %d online games currently", gs, len(gs.m_onlineGames))
 }
 
 func (gs *GameService) handleNotifyGameDisconnected(pkt *netutil.Packet) {
@@ -49,7 +49,7 @@ func (gs *GameService) handleNotifyGameDisconnected(pkt *netutil.Packet) {
 	}
 
 	gs.m_onlineGames.Remove(gameid)
-	gwlog.Infof("%s notify game disconnected: %d online games left", gs, len(gs.m_onlineGames))
+	gwlog.Infof("[GameService-handleNotifyGameDisconnected]%s notify game disconnected: %d online games left", gs, len(gs.m_onlineGames))
 }
 
 func (gs *GameService) handleNotifyDeploymentReady(pkt *netutil.Packet) {
@@ -82,6 +82,9 @@ func (gs *GameService) HandleNotifyClientConnected(clientId common.ClientID) {
 	//if consts.DEBUG_PACKETS {
 	//	gwlog.Debugf("%s.handleNotifyClientConnected: %s", gs, client)
 	//}
+	if consts.DEBUG_CLIENTS {
+		gwlog.Infof("[GameService-HandleNotifyClientConnected]%s notify client connected:[%v]", gs, clientId)
+	}
 
 	// TODO, call lua function
 }

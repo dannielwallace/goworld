@@ -30,7 +30,7 @@ func Initialize(ctx context.Context, collectInterval time.Duration) {
 			}
 
 			uPCnt := uint16(pcnt)
-			gwlog.Debugf("gamelbc: cpu percent is %.3f%%", pcnt)
+			//gwlog.Debugf("gamelbc: cpu percent is %.3f%%", pcnt)
 			dispatchercluster.SendGameLBCInfo(uPCnt)
 		}
 	})

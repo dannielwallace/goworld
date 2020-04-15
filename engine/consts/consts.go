@@ -93,10 +93,6 @@ const (
 const (
 	// DEBUG_PACKETS prints packet send/recv debug logs
 	DEBUG_PACKETS = false
-	// DEBUG_SPACES prints space operation debug logs
-	DEBUG_SPACES = false
-	// DEBUG_SAVE_LOAD prints save & load debug logs
-	DEBUG_SAVE_LOAD = false
 	// DEBUG_CLIENTS prints clients operation debug logs
 	DEBUG_CLIENTS = false
 	// DEBUG_MIGRATE prints migration debug logs

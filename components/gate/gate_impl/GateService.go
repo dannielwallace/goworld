@@ -203,7 +203,7 @@ func (gs *GateService) handleClientMsgDirect2GS(cp *ClientProxy, pkt *netutil.Pa
 	pkt.AppendClientID(cp.m_clientId)
 
 	dispId := dispatchercluster.ClientIDToDispatcherID(cp.m_clientId)
-	_ = dispatchercluster.SelectByDispatcherID(dispId - 1).SendPacketRelease(pkt)
+	_ = dispatchercluster.SelectByDispatcherID(dispId).SendPacket(pkt)
 }
 
 // HANDLE CLIENT MSG END

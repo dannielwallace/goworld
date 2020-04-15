@@ -88,7 +88,7 @@ func (ds *DispatcherService) handleSetGameID(dcp *dispatcherClientProxy, pkt *ne
 		ds.recalcBootGames() // recalc if necessary
 	}
 
-	gwlog.Infof("%s: %s set gameid = %d", ds, dcp, gameid)
+	gwlog.Infof("[DispatcherService-handleSetGameID]%s: %s set gameid = %d", ds, dcp, gameid)
 	// reuse the packet to send SET_GAMEID_ACK with all connected gameids
 	connectedGameIDs := ds.getConnectedGameIDs()
 
@@ -108,7 +108,7 @@ func (ds *DispatcherService) handleGameLBCInfo(dcp *dispatcherClientProxy, packe
 	// handle game LBC info from game
 	var cpuUsageInPercent float64
 	cpuUsageInPercent = float64(packet.ReadUint16())
-	gwlog.Debugf("Game %d Load Balancing Info: %+v", dcp.gameid, cpuUsageInPercent)
+	// gwlog.Debugf("Game %d Load Balancing Info: %+v", dcp.gameid, cpuUsageInPercent)
 
 	cpuUsageInPercent *= 1 + (rand.Float64() * 0.1) // multiply CPUPercent by a random factor 1.0 ~ 1.1
 	gdi := ds.m_games[dcp.gameid]

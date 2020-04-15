@@ -69,7 +69,7 @@ func (gdi *gameDispatchInfo) dispatchPacket(pkt *netutil.Packet) error {
 			gdi.pendingPacketQueue = append(gdi.pendingPacketQueue, pkt)
 			pkt.AddRefCount(1)
 
-			if len(gdi.pendingPacketQueue)%1 == 0 {
+			if len(gdi.pendingPacketQueue) % 1 == 0 {
 				gwlog.Warnf("game %d pending packet count = %d, blocked = %v, clientProxy = %s", gdi.gameid, len(gdi.pendingPacketQueue), gdi.isBlocked, gdi.clientProxy)
 			}
 			return nil

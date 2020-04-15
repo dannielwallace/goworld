@@ -130,7 +130,9 @@ func (dcm *DispatcherConnMgr) serveDispatcherClient() {
 				continue
 			}
 
-			gwlog.TraceError("serveDispatcherClient: RecvMsgPacket error: %s", err.Error())
+			if consts.DEBUG_PACKETS {
+				gwlog.TraceError("serveDispatcherClient: RecvMsgPacket error: %s", err.Error())
+			}
 			_ = dc.Close()
 			dcm.delegate.HandleDispatcherClientDisconnect()
 			time.Sleep(_LOOP_DELAY_ON_DISPATCHER_CLIENT_ERROR)
